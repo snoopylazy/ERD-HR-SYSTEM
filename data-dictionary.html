@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HR System - Data Dictionary</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+    </script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            background:#0f0f23;
+            color:#e0e0e0;
+            font-family:'Segoe UI',Tahoma,sans-serif;
+            display:flex;
+            min-height:100vh;
+        }
+        ::-webkit-scrollbar{width:6px}
+        ::-webkit-scrollbar-track{background:#151530}
+        ::-webkit-scrollbar-thumb{background:#3a3a6a;border-radius:3px}
+        ::-webkit-scrollbar-thumb:hover{background:#e94560}
+
+        .sidebar{
+            width:260px;
+            background:#12122a;
+            border-right:1px solid #252545;
+            overflow-y:auto;
+            flex-shrink:0;
+            padding:16px 0;
+        }
+        .sidebar h2{
+            font-size:15px;
+            color:#e94560;
+            padding:0 16px 12px;
+            border-bottom:1px solid #252545;
+            margin-bottom:8px;
+        }
+        .sidebar .group-label{
+            font-size:11px;
+            color:#666;
+            text-transform:uppercase;
+            letter-spacing:1px;
+            padding:12px 16px 4px;
+        }
+        .sidebar a{
+            display:block;
+            padding:6px 16px;
+            color:#aaa;
+            text-decoration:none;
+            font-size:13px;
+            transition:all .15s;
+            border-left:3px solid transparent;
+        }
+        .sidebar a:hover{background:#1a1a3e;color:#fff}
+        .sidebar a.active{
+            background:#1a1a3e;
+            color:#e94560;
+            border-left-color:#e94560;
+        }
+        .sidebar .count-badge{
+            float:right;
+            background:#2a2a4a;
+            color:#888;
+            font-size:10px;
+            padding:1px 7px;
+            border-radius:8px;
+            margin-top:2px;
+        }
+        .sidebar a.active .count-badge{background:#e94560;color:#fff}
+
+        .main{
+            flex:1;
+            padding:24px 32px;
+            overflow-y:auto;
+            max-height:100vh;
+        }
+        .main h1{
+            font-size:24px;
+            margin-bottom:4px;
+        }
+        .main h1 span{color:#e94560}
+        .main .subtitle{
+            color:#888;
+            font-size:13px;
+            margin-bottom:24px;
+        }
+        .main h2{
+            font-size:18px;
+            color:#e94560;
+            margin-bottom:4px;
+            padding-bottom:8px;
+            border-bottom:1px solid #252545;
+        }
+        .main .table-meta{
+            font-size:13px;
+            color:#999;
+            margin:6px 0 16px;
+        }
+        .main .table-meta span{
+            display:inline-block;
+            background:#1a1a3e;
+            padding:2px 10px;
+            border-radius:4px;
+            margin-right:8px;
+            border:1px solid #252545;
+        }
+        .main .table-meta .indexes{
+            color:#e94560;
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+            font-size:13px;
+            margin-bottom:32px;
+        }
+        thead th{
+            text-align:left;
+            padding:10px 12px;
+            background:#1a1a3e;
+            color:#e94560;
+            font-weight:600;
+            font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:.5px;
+            border-bottom:2px solid #e94560;
+            position:sticky;
+            top:0;
+        }
+        thead th:nth-child(1){width:180px}
+        thead th:nth-child(2){width:140px}
+        thead th:nth-child(3){width:100px}
+        thead th:nth-child(4){width:auto}
+
+        tbody tr{
+            border-bottom:1px solid #1e1e3a;
+            transition:background .1s;
+        }
+        tbody tr:hover{background:#151530}
+        tbody td{
+            padding:8px 12px;
+            vertical-align:top;
+        }
+        tbody td .type{
+            color:#7c7cf0;
+            font-family:'Consolas','Courier New',monospace;
+            font-size:12px;
+        }
+        tbody td .constraint{
+            display:inline-block;
+            font-size:10px;
+            padding:1px 6px;
+            border-radius:3px;
+            margin:1px 2px;
+            font-weight:600;
+        }
+        .constraint.pk{background:#e94560;color:#fff}
+        .constraint.fk{background:#0f3460;color:#7fc}
+        .constraint.req{background:#2a4a2a;color:#8f8}
+        .constraint.uniq{background:#4a2a4a;color:#f8f}
+        .constraint.idx{background:#2a3a4a;color:#8cf}
+        .constraint.def{background:#2a2a2a;color:#aaa}
+
+        .field-desc{
+            color:#888;
+            font-size:12px;
+            font-style:italic;
+        }
+
+        .entity-count{
+            text-align:center;
+            color:#555;
+            font-size:13px;
+            margin:24px 0 8px;
+        }
+
+        .search-box{
+            margin:0 16px 12px;
+        }
+        .search-box input{
+            width:100%;
+            padding:8px 12px;
+            border-radius:6px;
+            border:1px solid #2a2a4a;
+            background:#0f0f23;
+            color:#e0e0e0;
+            font-size:13px;
+            outline:none;
+        }
+        .search-box input:focus{border-color:#e94560}
+
+        .no-matches{
+            text-align:center;
+            color:#666;
+            padding:40px;
+            font-size:14px;
+        }
+
+        @media(max-width:900px){
+            .sidebar{width:200px}
+            .main{padding:16px}
+            thead th:nth-child(1){width:120px}
+            thead th:nth-child(2){width:100px}
+            thead th:nth-child(3){width:80px}
+        }
+        @media(max-width:640px){
+            body{flex-direction:column}
+            .sidebar{width:100%;border-right:none;border-bottom:1px solid #252545;max-height:200px}
+            .main{max-height:none}
+        }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+    <h2>Data Dictionary</h2>
+    <div class="search-box">
+        <input type="text" id="sidebarSearch" placeholder="Search tables..." oninput="filterSidebar()" />
+    </div>
+    <div id="sidebarLinks">
+        <div class="group-label">Core System</div>
+        <a href="#tbl-Company" class="active" onclick="scrollToTable('Company')">Company</a>
+        <a href="#tbl-Branch" onclick="scrollToTable('Branch')">Branch</a>
+        <a href="#tbl-Department" onclick="scrollToTable('Department')">Department</a>
+        <a href="#tbl-Role" onclick="scrollToTable('Role')">Role</a>
+        <a href="#tbl-User" onclick="scrollToTable('User')">User</a>
+        <a href="#tbl-UserLog" onclick="scrollToTable('UserLog')">UserLog</a>
+        <a href="#tbl-Currency" onclick="scrollToTable('Currency')">Currency</a>
+        <a href="#tbl-ExchangeRate" onclick="scrollToTable('ExchangeRate')">ExchangeRate</a>
+        <a href="#tbl-SymbolCurrency" onclick="scrollToTable('SymbolCurrency')">SymbolCurrency</a>
+        <a href="#tbl-Representative" onclick="scrollToTable('Representative')">Representative</a>
+        <a href="#tbl-Holiday" onclick="scrollToTable('Holiday')">Holiday</a>
+
+        <div class="group-label">HR - Employee</div>
+        <a href="#tbl-Employee" onclick="scrollToTable('Employee')">Employee</a>
+        <a href="#tbl-EmployeePosition" onclick="scrollToTable('EmployeePosition')">EmployeePosition</a>
+        <a href="#tbl-EmployeeOldDoc" onclick="scrollToTable('EmployeeOldDoc')">EmployeeOldDoc</a>
+        <a href="#tbl-EmployeeCapital" onclick="scrollToTable('EmployeeCapital')">EmployeeCapital</a>
+        <a href="#tbl-Attendance" onclick="scrollToTable('Attendance')">Attendance</a>
+        <a href="#tbl-LocationCheck" onclick="scrollToTable('LocationCheck')">LocationCheck</a>
+        <a href="#tbl-LiveLocation" onclick="scrollToTable('LiveLocation')">LiveLocation</a>
+
+        <div class="group-label">HR - Leave</div>
+        <a href="#tbl-LeaveType" onclick="scrollToTable('LeaveType')">LeaveType</a>
+        <a href="#tbl-PermissionLeave" onclick="scrollToTable('PermissionLeave')">PermissionLeave</a>
+
+        <div class="group-label">HR - Payroll &amp; Eval</div>
+        <a href="#tbl-Payroll" onclick="scrollToTable('Payroll')">Payroll</a>
+        <a href="#tbl-PayrollTerminationEmployee" onclick="scrollToTable('PayrollTerminationEmployee')">PayrollTerminationEmp</a>
+        <a href="#tbl-Evaluation" onclick="scrollToTable('Evaluation')">Evaluation</a>
+        <a href="#tbl-SaoThunPayment" onclick="scrollToTable('SaoThunPayment')">SaoThunPayment</a>
+
+        <div class="group-label">HR - Expense &amp; Assets</div>
+        <a href="#tbl-ExpenseType" onclick="scrollToTable('ExpenseType')">ExpenseType</a>
+        <a href="#tbl-Expense" onclick="scrollToTable('Expense')">Expense</a>
+        <a href="#tbl-RequestAccidentExpense" onclick="scrollToTable('RequestAccidentExpense')">RequestAccidentExpense</a>
+        <a href="#tbl-Category" onclick="scrollToTable('Category')">Category</a>
+        <a href="#tbl-CompanyAsset" onclick="scrollToTable('CompanyAsset')">CompanyAsset</a>
+        <a href="#tbl-CompanyAssetTransaction" onclick="scrollToTable('CompanyAssetTransaction')">CompanyAssetTransaction</a>
+        <a href="#tbl-PurchaseAssets" onclick="scrollToTable('PurchaseAssets')">PurchaseAssets</a>
+        <a href="#tbl-PurchaseAssetHistory" onclick="scrollToTable('PurchaseAssetHistory')">PurchaseAssetHistory</a>
+        <a href="#tbl-StockTransfer" onclick="scrollToTable('StockTransfer')">StockTransfer</a>
+        <a href="#tbl-CopyAssetTransaction" onclick="scrollToTable('CopyAssetTransaction')">CopyAssetTransaction</a>
+        <a href="#tbl-CuttingStockCollection" onclick="scrollToTable('CuttingStockCollection')">CuttingStockCollection</a>
+
+        <div class="group-label">HR - Notifications &amp; Calendar</div>
+        <a href="#tbl-HrNotification" onclick="scrollToTable('HrNotification')">HrNotification</a>
+        <a href="#tbl-CalendarNote" onclick="scrollToTable('CalendarNote')">CalendarNote</a>
+        <a href="#tbl-Meeting" onclick="scrollToTable('Meeting')">Meeting</a>
+
+        <div class="group-label">System &amp; Logs</div>
+        <a href="#tbl-DeleteLog" onclick="scrollToTable('DeleteLog')">DeleteLog</a>
+
+        <div class="group-label">Mobile</div>
+        <a href="#tbl-MobileAppVersion" onclick="scrollToTable('MobileAppVersion')">MobileAppVersion</a>
+        <a href="#tbl-MobileNew" onclick="scrollToTable('MobileNew')">MobileNew</a>
+
+        <div class="group-label">Integration</div>
+        <a href="#tbl-ExchangeRateTelegramBot" onclick="scrollToTable('ExchangeRateTelegramBot')">ExchangeRateTelegramBot</a>
+    </div>
+</nav>
+
+<div class="main" id="mainContent">
+    <h1><span>HR</span> System Data Dictionary</h1>
+    <p class="subtitle">Complete field-level documentation for all 42 MongoDB collections</p>
+
+    <div style="margin-bottom:16px">
+        <button onclick="exportXLSX()" style="padding:8px 18px;border:1px solid #e94560;border-radius:6px;background:#1a1a3e;color:#e94560;cursor:pointer;font-size:13px">Export to Excel (1 sheet per table)</button>
+    </div>
+
+    <div id="tablesContainer"></div>
+
+    <div class="entity-count">42 collections &middot; Generated from Mongoose schemas</div>
+</div>
+
+<script>
+var TABLES = [];
+
+function T(name, desc, fields, opts) {
+    var indexes = (opts && opts.indexes) || [];
+    return { name: name, description: desc || '', fields: fields, indexes: indexes };
+}
+
+function F(name, type, required, desc, constraints) {
+    const c = constraints || [];
+    if (required === 'required' || required === true) c.push('req');
+    return { name: name, type: type, required: required, desc: desc || '', constraints: c };
+}
+
+// ========== CORE SYSTEM ==========
+
+TABLES.push(T('Company', 'Top-level entity holding global company settings, work hours, and bonus config.', [
+    F('_id', 'ObjectId', true, 'Auto-generated MongoDB ID', ['pk']),
+    F('name', 'String', true, 'Company name'),
+    F('contact', 'String', true, 'Contact information'),
+    F('directorName', 'String', true, 'Director name'),
+    F('logoUrl', 'String', false, 'Company logo URL'),
+    F('visionary', 'String', false, 'Visionary statement'),
+    F('slogan', 'String', false, 'Company slogan'),
+    F('createdBy', 'String', false, 'ID of user who created'),
+    F('rangGaveEmployeeSaoThun', 'Number', false, 'Years threshold (>=2) to grant SaoThun to employee'),
+    F('bonuses', '[Mixed]', false, 'Array of bonus definitions'),
+    F('workDay', 'Map<Mixed>', false, 'Work day schedule configuration'),
+    F('startWorkHour', 'Date', false, 'Global work start time'),
+    F('breakTime', 'Date', false, 'Global break start time'),
+    F('comeBackHour', 'Date', false, 'Global break end / return time'),
+    F('endWorkHour', 'Date', false, 'Global work end time'),
+    F('createdAt', 'Date', false, 'Record creation timestamp'),
+    F('updatedBy', 'String', false, 'ID of last updater'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+]));
+
+TABLES.push(T('Branch', 'Branch/office entity. Each branch has its own work schedule, currency, and optional EOD/EOM tracking.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('name', 'String', true, 'Branch name (unique)', ['uniq']),
+    F('abbreviation', 'String', true, 'Short code (unique)', ['uniq']),
+    F('directorName', 'String', false, 'Branch director name'),
+    F('ceoId', 'String', false, 'Ref User – CEO of branch', ['fk']),
+    F('bmId', 'String', false, 'Ref User – Branch Manager', ['fk']),
+    F('dbmId', 'String', false, 'Ref User – Deputy Branch Manager', ['fk']),
+    F('contact', 'String', true, 'Contact number'),
+    F('address', 'String', false, 'Physical address'),
+    F('email', 'String', false, 'Branch email'),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('baseCurrencyId', 'ObjectId', true, 'Ref Currency – default currency', ['fk']),
+    F('workDay', 'Map<Boolean>', true, 'Work day flags per day of week'),
+    F('description', 'String', false, 'Branch description'),
+    F('createdBy', 'String', false, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('botToken', 'String', false, 'Telegram bot token for branch'),
+    F('lastEOD', 'Date', false, 'Last End-of-Day processing date'),
+    F('lastEOM', 'Date', false, 'Last End-of-Month processing date'),
+    F('lastEODMY', 'Map<ObjectId>', false, 'Last EOD by month/year'),
+    F('idCustomDisbursement', 'String', false, 'Custom disbursement identifier'),
+    F('idRelationShipBranch', 'String', false, 'Ref Branch – related branch', ['fk']),
+    F('startCapital', 'Number', false, 'Starting capital amount'),
+    F('backupCapital', 'Number', false, 'Backup capital amount'),
+    F('city', 'String', false, 'City location'),
+    F('lat', 'Number', false, 'Latitude coordinate'),
+    F('lon', 'Number', false, 'Longitude coordinate')
+], { indexes: ['baseCurrencyId + status'] }));
+
+TABLES.push(T('Department', 'Department entity organizing employees within a branch.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('name', 'String', true, 'Department name (unique, trimmed)', ['uniq']),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('description', 'String', false, 'Department description'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID')
+], { indexes: ['status'] }));
+
+TABLES.push(T('Role', 'Role definition with granular permissions, control staff flags, and access system settings.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('name', 'String', true, 'Role name'),
+    F('representativeName', 'String', true, 'Display/representative name'),
+    F('branchId', 'String', false, 'Branch scope (null = global)'),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('permission', 'Map<Mixed>', false, 'Granular permission map (key:permission -> value)'),
+    F('controlStaff', 'Map<Boolean|Number>', false, 'Staff control settings, values must be boolean or number'),
+    F('accessSystem', '[String]', false, 'List of accessible system modules'),
+    F('note', 'String', false, 'Role description note'),
+    F('disbursementApproveInPolicy', 'Map<Mixed>', false, 'Disbursement approval within policy limits'),
+    F('disbursementApproveOppositePolicy', 'Map<Mixed>', false, 'Disbursement approval opposite policy limits'),
+    F('branchIdsIncludeCanDoTraction', '[String]', false, 'Branches this role can perform transactions in'),
+    F('createdBy', 'String', false, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+]));
+
+TABLES.push(T('User', 'System user account linked to an Employee. Supports multi-branch, role-based access, and device tracking.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('username', 'String', true, 'Login username (min 3 chars, unique)', ['uniq']),
+    F('displayName', 'String', false, 'Display name'),
+    F('email', 'String', true, 'Email address (unique, validated)', ['uniq']),
+    F('password', 'String', true, 'Hashed password (min 8 chars)'),
+    F('branchId', '[String]', false, 'Ref Branch – accessible branches'),
+    F('roleId', 'ObjectId', false, 'Ref Role – assigned role', ['fk']),
+    F('chiefIds', '[String]', false, 'Ref User – supervisor/chief IDs'),
+    F('imageURL', 'String', false, 'Profile image URL'),
+    F('mainRole', 'String', false, 'Enum: Super Admin, Admin, User, Public User'),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('employeeId', 'String', false, 'Ref Employee – linked employee', ['fk']),
+    F('phoneNumber', 'String', false, 'Phone number'),
+    F('gender', 'String', false, 'Gender'),
+    F('dob', 'Date', false, 'Date of birth'),
+    F('address', 'String', false, 'Address'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('resetToken', 'String', false, 'Password reset token'),
+    F('resetedAt', 'Date', false, 'Password reset timestamp'),
+    F('chatIds', '[Mixed]', false, 'Chat platform IDs'),
+    F('devicesLog', '[Mixed]', false, 'Device login history'),
+    F('balanceBankNoteAvailable', '[Mixed]', false, 'Available banknote balance per denomination'),
+    F('fcmTokens', '[String]', false, 'Firebase Cloud Messaging tokens'),
+    F('mainBranchId', 'String', false, 'Primary branch ID'),
+    F('loginAttempts', 'Number', false, 'Failed login counter'),
+    F('lockUntil', 'Date', false, 'Account lockout expiry'),
+    F('lockoutCount', 'Number', false, 'Lockout occurrence count'),
+    F('otpCode', 'String', false, 'Current OTP code'),
+    F('otpExpiry', 'Date', false, 'OTP expiry time'),
+    F('otpAttempts', 'Number', false, 'OTP attempt counter')
+], { indexes: ['branchId', 'username', 'email', 'chiefIds'] }));
+
+TABLES.push(T('UserLog', 'Audit log for user device and system activity.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('userId', 'String', true, 'User ID'),
+    F('deviceLog', 'Map<Mixed>', true, 'Device/session information'),
+    F('typeOfSystem', 'String', false, 'System type identifier'),
+    F('createdAt', 'Date', true, 'Log timestamp')
+], { indexes: ['userId'] }));
+
+TABLES.push(T('Currency', 'Currency definition with symbol map, rounding config, and decimal precision.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('name', 'String', true, 'Currency name (trimmed)'),
+    F('symbol', 'Map<Mixed>', false, 'Symbol representation map'),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('typeOfRounding', 'String', false, 'Rounding method'),
+    F('numberOfDecimalPlaces', 'Number', false, 'Decimal precision'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+]));
+
+TABLES.push(T('ExchangeRate', 'Exchange rate between two currencies with rate value tracking.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('name', 'String', true, 'Rate name/label'),
+    F('fromCurrency', 'Map<Mixed>', true, 'Source currency data'),
+    F('toCurrency', 'Map<Mixed>', true, 'Target currency data'),
+    F('rate', 'Number', true, 'Exchange rate value'),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('createdBy', 'String', false, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+]));
+
+TABLES.push(T('SymbolCurrency', 'Currency symbol reference list.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('symbol', 'String', true, 'Symbol string (unique, trimmed)', ['uniq']),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('createdBy', 'String', false, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+]));
+
+TABLES.push(T('Representative', 'Representative name list for roles or entities.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('representativeName', '[Mixed]', false, 'Array of representative name entries'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+]));
+
+TABLES.push(T('Holiday', 'Yearly holiday calendar storing an array of holiday date entries.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('year', 'Number', true, 'Calendar year (unique)', ['uniq']),
+    F('holidays', '[{}]', true, 'Array of holiday objects'),
+    F('createdBy', 'String', false, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+]));
+
+// ========== HR - EMPLOYEE ==========
+
+TABLES.push(T('Employee', 'Core employee record with personal info, salary history, work schedule, evaluation tracking, and contract details.', [
+    F('_id', 'String', true, 'Custom string ID (not auto ObjectId)', ['pk']),
+    F('idCustom', 'String', false, 'Additional custom ID'),
+    F('branchId', 'String', true, 'Ref Branch – employee branch', ['fk']),
+    F('profileURL', 'String', false, 'Profile photo URL'),
+    F('guarDians', '[Mixed]', false, 'Guardian/emergency contact info'),
+    F('chiefId', 'String', false, 'Ref Employee – direct supervisor'),
+    F('evaluationDate', '[Mixed]', false, 'Historical evaluation dates'),
+    F('saoThun', '[Mixed]', false, 'SaoThun (seniority) records'),
+    F('khName', 'String', true, 'Khmer name (unique)', ['uniq']),
+    F('enName', 'String', true, 'English name (unique)', ['uniq']),
+    F('age', 'Number', false, 'Age'),
+    F('position', 'String', false, 'Job position title'),
+    F('salary', '[Mixed]', true, 'Salary history records'),
+    F('department', 'Map<Mixed>', false, 'Department assignment map'),
+    F('joiningDate', 'Date', false, 'Date of joining'),
+    F('phone', '[Mixed]', false, 'Phone number entries'),
+    F('dob', 'Date', false, 'Date of birth'),
+    F('gender', 'String', false, 'Gender'),
+    F('startWorkHour', 'Date', true, 'Personal work start time'),
+    F('breakTime', 'Date', true, 'Personal break start time'),
+    F('comeBackHour', 'Date', true, 'Personal break end time'),
+    F('endWorkHour', 'Date', true, 'Personal work end time'),
+    F('numberOfPermissionPerYear', 'Number', false, 'Annual leave allowance'),
+    F('locationCheckAttendancePermission', '[Mixed]', false, 'Allowed locations for attendance'),
+    F('contract', 'String', false, 'Contract type'),
+    F('startContractDate', 'Date', false, 'Contract start date'),
+    F('endContractDate', 'Date', false, 'Contract end date'),
+    F('status', 'String', false, 'Status: active, inactive, terminated, resigned'),
+    F('address', 'String', false, 'Residential address'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('note', 'String', false, 'General notes'),
+    F('gasolineAllowance', 'Map<Mixed>', false, 'Gasoline/fuel allowance config'),
+    F('education', 'String', false, 'Education level'),
+    F('isCheckOutNoLocation', 'Boolean', false, 'Allow checkout without location'),
+    F('isCheckInNoLocation', 'Boolean', false, 'Allow checkin without location'),
+    F('terminationDate', 'Date', false, 'Employment termination date'),
+    F('nextEvaluationDate', 'Date', false, 'Next scheduled evaluation'),
+    F('nextAlertEvaluationDate', 'Date', false, 'Next evaluation alert'),
+    F('isStillHasEvaluate', 'Boolean', false, 'Has pending evaluation flag'),
+    F('saoThunPaymentTransactionId', '[String]', false, 'Related SaoThun payment transaction IDs'),
+    F('rejoiningDate', 'Date', false, 'Re-joining date (if rehired)'),
+    F('payRollIds', '[String]', false, 'Related payroll IDs'),
+    F('areaCommission', 'Number', false, 'Area-based commission rate'),
+    F('positionCommission', 'Number', false, 'Position-based commission rate'),
+    F('isPaidTerminationPayroll', 'Boolean', false, 'Whether termination payroll is paid')
+], { indexes: ['branchId', 'branchId + status'] }));
+
+TABLES.push(T('EmployeePosition', 'Employee position/job title reference table.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('name', 'String', true, 'Position name (unique)', ['uniq']),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('description', 'String', false, 'Position description'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+], { indexes: ['status'] }));
+
+TABLES.push(T('EmployeeOldDoc', 'Stores old/snapshotted employee document data for history.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('employeeId', 'String', true, 'Ref Employee', ['fk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('oldDoc', 'Map<Mixed>', false, 'Previous employee document snapshot'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+], { indexes: ['branchId + employeeId'] }));
+
+TABLES.push(T('EmployeeCapital', 'Employee capital/deposit transactions for tracking employee-held funds.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('amount', 'Number', true, 'Transaction amount'),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('employeeId', 'String', true, 'Ref Employee', ['fk']),
+    F('transactionType', 'String', true, 'Transaction type (e.g., deposit)'),
+    F('currency', 'Map<Mixed>', false, 'Currency info for the transaction'),
+    F('description', 'String', false, 'Transaction description'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+], { indexes: ['branchId + employeeId'] }));
+
+TABLES.push(T('Attendance', 'Employee check-in/check-out records with approval workflow.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('mainBranchId', 'String', false, 'Ref Branch – main/parent branch', ['fk']),
+    F('employeeId', 'String', true, 'Ref Employee', ['fk']),
+    F('chiefIds', '[String]', false, 'Ref User – approving chiefs'),
+    F('employeeName', 'String', false, 'Denormalized employee name'),
+    F('department', 'Map<Mixed>', false, 'Denormalized department info'),
+    F('statusAttendance', 'Map<Mixed>', false, 'Attendance status breakdown'),
+    F('checkIn', 'Map<Mixed>', false, 'Check-in data (time, location, etc.)'),
+    F('checkOut', 'Map<Mixed>', false, 'Check-out data (time, location, etc.)'),
+    F('reason', 'String', false, 'Reason for status'),
+    F('status', 'String', false, 'Status: approved, pending, rejected, confirmed, checked'),
+    F('statusCheck', 'String', false, 'Check status flag'),
+    F('typeOfCheck', 'String', true, 'Enum: Check-in, Check-out'),
+    F('createdBy', 'String', true, 'Ref User – recorder', ['fk']),
+    F('createdAt', 'Date', false, 'Record timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('approvedBy', 'String', false, 'Ref User – approver', ['fk']),
+    F('approvedDate', 'Date', false, 'Approval timestamp')
+], { indexes: ['branchId + createdBy + createdAt', 'branchId', 'employeeId'] }));
+
+TABLES.push(T('LocationCheck', 'GPS location definitions for attendance location verification.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('locationName', 'String', true, 'Display name for location'),
+    F('latitude', 'String', true, 'Latitude coordinate'),
+    F('longitude', 'String', true, 'Longitude coordinate'),
+    F('code', 'String', false, 'Auto-generated location code (LOC-XXXX)'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('status', 'Boolean', true, 'Active flag')
+], { indexes: ['branchId + status', 'code (unique sparse)'] }));
+
+TABLES.push(T('LiveLocation', 'Real-time employee location tracking during attendance sessions.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('employeeId', 'String', true, 'Ref Employee (unique, one active per employee)', ['uniq']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('latitude', 'Number', true, 'Current latitude'),
+    F('longitude', 'Number', true, 'Current longitude'),
+    F('locationName', 'String', false, 'Location label'),
+    F('deviceInfo', 'Object', false, 'Device information'),
+    F('isActive', 'Boolean', false, 'Whether location tracking is active'),
+    F('attendanceSessionId', 'String', false, 'Linked attendance session ID'),
+    F('lastUpdated', 'Date', false, 'Last location update timestamp'),
+    F('createdAt', 'Date', false, 'Record creation timestamp')
+], { indexes: ['branchId + isActive', 'lastUpdated (TTL 86400s)'] }));
+
+// ========== HR - LEAVE ==========
+
+TABLES.push(T('LeaveType', 'Leave category definition (sick, annual, etc.) with year-type flag.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('title', 'String', true, 'Leave type name (unique)', ['uniq']),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('isLeaveYearType', 'Boolean', false, 'Annual/year-based leave type'),
+    F('description', 'String', false, 'Description'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID')
+], { indexes: ['status + isLeaveYearType'] }));
+
+TABLES.push(T('PermissionLeave', 'Employee leave request with duration type, approval workflow, and multi-level chief validation.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('mainBranchId', 'String', false, 'Ref Branch – main/parent', ['fk']),
+    F('employeeId', 'String', true, 'Ref Employee', ['fk']),
+    F('employeeName', 'String', true, 'Denormalized employee name'),
+    F('chiefIds', '[String]', false, 'Ref User – approving chiefs'),
+    F('department', 'Map<Mixed>', false, 'Denormalized department'),
+    F('statusPermission', 'Map<Mixed>', false, 'Permission status breakdown'),
+    F('leaveType', 'Map<Mixed>', true, 'Leave type info (denormalized)'),
+    F('durationType', 'String', false, 'Duration type: full day, half day, hours, minutes'),
+    F('durationValue', 'Number', false, 'Duration numeric value'),
+    F('halfDayPart', 'String', false, 'Half day part: morning, afternoon'),
+    F('startDate', 'Date', true, 'Leave start date'),
+    F('endDate', 'Date', true, 'Leave end date'),
+    F('startHour', 'Date', false, 'Start time (hourly leave)'),
+    F('endHour', 'Date', false, 'End time (hourly leave)'),
+    F('reason', 'String', true, 'Leave reason'),
+    F('status', 'String', false, 'Status: pending, approved, rejected, confirmed'),
+    F('approvedBy', 'String', false, 'Ref User – approver', ['fk']),
+    F('approvedDate', 'Date', false, 'Approval timestamp'),
+    F('createdBy', 'String', true, 'Requester ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('numberOfDay', 'Number', false, 'Computed number of days')
+], { indexes: ['branchId + status + department + createdAt + employeeId + createdBy', 'branchId + status + department + createdAt + createdBy'] }));
+
+// ========== HR - PAYROLL & EVAL ==========
+
+TABLES.push(T('Payroll', 'Payroll batch processing with employee list, payment details, and approval.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('employeeIds', '[String]', true, 'Ref Employee – included employees'),
+    F('paymentDate', 'Date', true, 'Scheduled payment date'),
+    F('payments', '[Mixed]', true, 'Payment detail records per employee'),
+    F('status', 'String', false, 'Status: approved, pending, rejected'),
+    F('payrollEpisode', 'String', false, 'Payroll period/episode label'),
+    F('approvedBy', 'String', false, 'Ref User – approver', ['fk']),
+    F('approvedDate', 'Date', false, 'Approval timestamp'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('description', 'String', false, 'Payroll notes'),
+    F('terminationEmpIds', '[String]', false, 'Employee IDs with termination pay')
+], { indexes: ['branchId'] }));
+
+TABLES.push(T('PayrollTerminationEmployee', 'Records of termination payments made to employees.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('employeeId', 'String', true, 'Ref Employee', ['fk']),
+    F('amountPaid', 'Number', true, 'Termination payment amount'),
+    F('ref', 'String', true, 'Reference ID (e.g., payroll ID)'),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+]));
+
+TABLES.push(T('Evaluation', 'Employee performance evaluation cycles with scoring and next evaluation scheduling.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('employeeId', 'String', true, 'Ref Employee', ['fk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('evaluationPeriod', 'Date', false, 'Due date for the evaluation period'),
+    F('evaluationDate', 'Date', false, 'Date evaluation was performed'),
+    F('evaluations', '[Mixed]', true, 'Evaluation criteria scores data'),
+    F('evaluationStatus', 'String', false, 'Status: completed (default)'),
+    F('nextEvaluationDate', 'Date', false, 'Next scheduled evaluation date'),
+    F('alertEvaluationDate', 'Date', false, 'Alert/reminder date for next eval'),
+    F('comments', 'Map<Mixed>', false, 'Evaluator comments map'),
+    F('createdBy', 'String', true, 'Ref User – evaluator', ['fk']),
+    F('createdAt', 'Date', true, 'Evaluation creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID')
+], { indexes: ['branchId + employeeId + createdBy + evaluationDate'] }));
+
+TABLES.push(T('SaoThunPayment', 'Seniority (SaoThun) payment tracking linked to payroll episodes.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('employeeId', 'String', true, 'Ref Employee', ['fk']),
+    F('payment', 'Map<Mixed>', false, 'Payment detail data'),
+    F('payRollIds', '[String]', true, 'Linked payroll episode IDs'),
+    F('paymentDate', 'Date', false, 'Actual payment date'),
+    F('note', 'String', false, 'Payment notes'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+], { indexes: ['branchId'] }));
+
+// ========== HR - EXPENSE & ASSETS ==========
+
+TABLES.push(T('ExpenseType', 'Expense category definitions per branch.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('title', 'String', true, 'Expense type name'),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('createdBy', 'ObjectId', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'ObjectId', false, 'Ref User – last updater', ['fk'])
+], { indexes: ['branchId'] }));
+
+TABLES.push(T('Expense', 'Operational expense records with approval.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('amount', 'Number', true, 'Expense amount'),
+    F('expenseType', 'Map<Mixed>', true, 'Denormalized expense type info'),
+    F('isApproved', 'Boolean', false, 'Approval flag'),
+    F('approvedBy', 'ObjectId', false, 'Ref User – approver', ['fk']),
+    F('approvedDate', 'Date', false, 'Approval timestamp'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Ref User – last updater', ['fk'])
+], { indexes: ['branchId + createdBy'] }));
+
+TABLES.push(T('RequestAccidentExpense', 'Accident expense reimbursement requests with chief approval chain.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('mainBranchId', 'String', true, 'Ref Branch – main branch', ['fk']),
+    F('chiefIds', '[String]', true, 'Ref User – approval chain'),
+    F('status', 'Map<Mixed>', false, 'Status breakdown per chief'),
+    F('statusString', 'String', false, 'Aggregate status (pending default)'),
+    F('expenses', '[Mixed]', false, 'Expense line items'),
+    F('createdBy', 'String', true, 'Ref User – requester', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+], { indexes: ['branchId', 'mainBranchId', 'chiefIds'] }));
+
+TABLES.push(T('Category', 'Asset category taxonomy with subcategories.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('name', 'String', true, 'Category name (unique)', ['uniq']),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('description', 'String', false, 'Category description'),
+    F('subCategory', '[Mixed]', false, 'Subcategory definitions'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+], { indexes: ['status'] }));
+
+TABLES.push(T('CompanyAsset', 'Company physical assets/stock items with category, branch assignment, and stock tracking.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('idCustom', 'String', true, 'Custom asset identifier'),
+    F('mainTransferId', 'String', false, 'Main transfer reference ID'),
+    F('stockTransferId', '[String]', false, 'Ref StockTransfer – stock move history'),
+    F('copyAssetTransactionId', 'String', false, 'Copy transaction reference'),
+    F('purchasePrice', 'Number', false, 'Purchase/acquisition price'),
+    F('totalStock', 'Number', false, 'Total stock quantity'),
+    F('branchId', 'String', true, 'Ref Branch – owning branch', ['fk']),
+    F('category', 'Map<Mixed>', true, 'Denormalized category info'),
+    F('name', 'String', true, 'Asset name'),
+    F('description', 'String', false, 'Asset description'),
+    F('status', 'Boolean', false, 'Active/available flag'),
+    F('createdBy', 'String', true, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID')
+], { indexes: ['branchId + status'] }));
+
+TABLES.push(T('CompanyAssetTransaction', 'Asset check-out/return transactions tracking employee assignments.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('assetId', 'String', true, 'Ref CompanyAsset', ['fk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('mainBranchId', 'String', false, 'Ref Branch – parent branch'),
+    F('qty', 'Number', false, 'Quantity transacted'),
+    F('employeeId', 'String', false, 'Ref Employee – assignee', ['fk']),
+    F('transactionType', 'String', true, 'Type: checkout, returned'),
+    F('checkOutDate', 'Date', true, 'Check-out date'),
+    F('actualReturnDate', 'Date', false, 'Actual return date'),
+    F('remark', 'String', false, 'Transaction remarks'),
+    F('status', 'String', false, 'Status: in used (default)'),
+    F('chiefIds', '[String]', false, 'Ref User – approving chiefs'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Ref User – last updater', ['fk'])
+], { indexes: ['branchId + createdBy + approvedBy + status + createdAt', 'employeeId'] }));
+
+TABLES.push(T('PurchaseAssets', 'Asset purchase batch records with asset list.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('assets', '[Mixed]', false, 'Array of purchased asset data'),
+    F('assetIds', '[String]', false, 'Linked asset record IDs'),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('currency', 'String', false, 'Transaction currency'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+]));
+
+TABLES.push(T('PurchaseAssetHistory', 'History of asset purchases, transfers, and stock status.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('asset', 'Map<Mixed>', false, 'Asset snapshot data'),
+    F('purchaseAssetId', 'String', false, 'Linked purchase record ID'),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('stockTransferId', 'String', false, 'Linked stock transfer ID'),
+    F('cuttingStockIds', '[String]', false, 'Cutting stock record IDs'),
+    F('status', 'Boolean', false, 'Stock status: false=in stock, true=out of stock'),
+    F('isPurchase', 'Boolean', false, 'Is a purchase record'),
+    F('isTransfer', 'Boolean', false, 'Is a transfer record'),
+    F('currency', 'String', false, 'Currency used'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+]));
+
+TABLES.push(T('StockTransfer', 'Stock transfer between branches.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('fromBranchId', 'String', true, 'Source branch', ['fk']),
+    F('toBranchId', 'String', true, 'Destination branch', ['fk']),
+    F('assetsTransfer', '[Mixed]', false, 'Transferred asset data'),
+    F('assetsTransferId', '[String]', false, 'Transferred asset IDs'),
+    F('description', 'String', false, 'Transfer notes'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+]));
+
+TABLES.push(T('CopyAssetTransaction', 'Bulk asset copy transaction across branches.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('assets', '[Mixed]', false, 'Copied asset data'),
+    F('categoryIds', '[String]', false, 'Category IDs included'),
+    F('assetId', '[String]', false, 'Asset record IDs'),
+    F('fromBranchId', 'String', false, 'Source branch'),
+    F('toBranchId', 'String', false, 'Destination branch'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+]));
+
+TABLES.push(T('CuttingStockCollection', 'Stock reduction record for check-out or transfer operations.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('ref', 'String', false, 'Ref CompanyAssetTransaction', ['fk']),
+    F('purchaseAssetHistoryId', 'String', false, 'Ref PurchaseAssetHistory'),
+    F('amount', 'Number', true, 'Quantity deducted'),
+    F('type', 'String', true, 'Enum: transfer, check-out'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp')
+]));
+
+// ========== HR - NOTIFICATIONS & CALENDAR ==========
+
+TABLES.push(T('HrNotification', 'In-app HR notification with read/delete tracking and receiver targeting.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('title', 'String', true, 'Notification title'),
+    F('body', 'String', true, 'Notification body content'),
+    F('isRead', 'Boolean', false, 'Read flag'),
+    F('isDelete', 'Boolean', false, 'Deleted flag'),
+    F('branchId', 'String', true, 'Branch scope'),
+    F('senderId', 'String', true, 'Sender user ID'),
+    F('receiverId', 'String', true, 'Target user ID'),
+    F('data', 'Map<Mixed>', false, 'Additional payload data'),
+    F('chiefIds', '[String]', false, 'Chief/admin IDs for context'),
+    F('transactionType', 'String', false, 'Related transaction type'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID')
+], { indexes: ['branchId + receiverId'] }));
+
+TABLES.push(T('CalendarNote', 'Date-specific notes per branch for calendar display.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('date', 'Date', true, 'Note date (unique per branch)'),
+    F('text', 'String', true, 'Note text'),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('createdBy', 'String', false, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+], { indexes: ['date + branchId (unique)'] }));
+
+TABLES.push(T('Meeting', 'Meeting scheduler with department targeting and status tracking.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('title', 'String', true, 'Meeting title (trimmed)'),
+    F('date', 'Date', true, 'Meeting date'),
+    F('startTime', 'String', true, 'Start time (HH:mm)'),
+    F('endTime', 'String', true, 'End time (HH:mm)'),
+    F('departmentIds', '[String]', false, 'Targeted department IDs'),
+    F('status', 'String', false, 'Enum: Pending, Meeting, Done, Cancelled'),
+    F('note', 'String', false, 'Meeting notes'),
+    F('branchId', 'String', true, 'Ref Branch', ['fk']),
+    F('createdBy', 'String', false, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+], { indexes: ['date + branchId', 'status'] }));
+
+// ========== SYSTEM & LOGS ==========
+
+TABLES.push(T('DeleteLog', 'Audit log for deleted documents with type classification.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('branchId', 'String', false, 'Ref Branch – branch context', ['fk']),
+    F('deleteDoc', 'Map<Mixed>', false, 'Snapshot of deleted document'),
+    F('deleteType', 'String', true, 'Document type deleted'),
+    F('createdBy', 'String', true, 'Ref User – who deleted', ['fk']),
+    F('createdAt', 'Date', false, 'Deletion timestamp')
+], { indexes: ['createdBy', 'deleteType'] }));
+
+// ========== MOBILE ==========
+
+TABLES.push(T('MobileAppVersion', 'Mobile app version tracking with platform, min-version enforcement, and store links.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('plateForm', 'String', false, 'Platform identifier'),
+    F('latestVersion', 'String', true, 'Latest app version string'),
+    F('minRequiredVersion', 'String', false, 'Minimum required version'),
+    F('appStoreLink', 'String', false, 'iOS App Store link'),
+    F('playStoreLink', 'String', false, 'Google Play Store link'),
+    F('typeOfSystem', 'String', false, 'System type label'),
+    F('status', 'Boolean', false, 'Active flag'),
+    F('isUpdateApp', 'Boolean', false, 'Force update flag'),
+    F('createdBy', 'String', false, 'Creator ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+]));
+
+TABLES.push(T('MobileNew', 'Mobile app news/announcements with image support.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('title', 'String', true, 'News title'),
+    F('description', 'String', false, 'News content'),
+    F('imageURL', 'String', false, 'Featured image URL'),
+    F('status', 'Boolean', false, 'Published flag'),
+    F('createdBy', 'String', true, 'Author ID'),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID'),
+    F('updatedAt', 'Date', false, 'Last update timestamp')
+]));
+
+// ========== INTEGRATION ==========
+
+TABLES.push(T('ExchangeRateTelegramBot', 'Telegram bot configuration for exchange rate notifications.', [
+    F('_id', 'ObjectId', true, 'Auto-generated ID', ['pk']),
+    F('botToken', 'String', true, 'Telegram bot token'),
+    F('userChatIds', '[String]', false, 'Subscribed user chat IDs'),
+    F('createdBy', 'String', true, 'Ref User – creator', ['fk']),
+    F('createdAt', 'Date', false, 'Creation timestamp'),
+    F('updatedAt', 'Date', false, 'Last update timestamp'),
+    F('updatedBy', 'String', false, 'Last updater ID')
+]));
+
+// ========== RENDER ==========
+
+function constraintHTML(c) {
+    var map = { pk:'PK', fk:'FK', req:'Req', uniq:'Unique', idx:'Index', def:'Default' };
+    return '<span class="constraint '+c+'">'+(map[c]||c)+'</span>';
+}
+
+function typeHTML(t) {
+    return '<span class="type">'+t+'</span>';
+}
+
+function render() {
+    var container = document.getElementById('tablesContainer');
+    var html = '';
+    for (var i = 0; i < TABLES.length; i++) {
+        var t = TABLES[i];
+        html += '<div class="table-section" id="tbl-'+t.name+'">';
+        html += '<h2>'+t.name+'</h2>';
+        html += '<div class="table-meta">';
+        html += '<span>'+t.fields.length+' fields</span>';
+        if (t.indexes.length) html += '<span class="indexes">Indexes: '+t.indexes.join(', ')+'</span>';
+        html += '</div>';
+        if (t.description) html += '<p style="color:#999;font-size:13px;margin-bottom:12px">'+t.description+'</p>';
+        html += '<table><thead><tr><th>Field</th><th>Type</th><th>Constraints</th><th>Description</th></tr></thead><tbody>';
+        for (var j = 0; j < t.fields.length; j++) {
+            var f = t.fields[j];
+            var cons = '';
+            for (var k = 0; k < f.constraints.length; k++) {
+                if (f.constraints[k] !== 'req') cons += constraintHTML(f.constraints[k]);
+            }
+            if (!f.required || f.required === false) cons += constraintHTML('def');
+            html += '<tr>';
+            html += '<td><code>'+f.name+'</code></td>';
+            html += '<td>'+typeHTML(f.type)+'</td>';
+            html += '<td>'+cons+'</td>';
+            html += '<td>'+(f.desc ? '<span class="field-desc">'+f.desc+'</span>' : '')+'</td>';
+            html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+    }
+    container.innerHTML = html;
+}
+
+function scrollToTable(name) {
+    var el = document.getElementById('tbl-'+name);
+    if (el) {
+        el.scrollIntoView({ behavior:'smooth', block:'start' });
+        document.querySelectorAll('.sidebar a').forEach(function(a){ a.classList.remove('active'); });
+        var link = document.querySelector('.sidebar a[href="#tbl-'+name+'"]');
+        if (link) link.classList.add('active');
+    }
+}
+
+function filterSidebar() {
+    var q = document.getElementById('sidebarSearch').value.toLowerCase();
+    document.querySelectorAll('#sidebarLinks a').forEach(function(a) {
+        a.style.display = a.textContent.toLowerCase().includes(q) ? 'block' : 'none';
+    });
+    document.querySelectorAll('#sidebarLinks .group-label').forEach(function(g) {
+        var next = g.nextElementSibling;
+        var has = false;
+        while (next && next.tagName === 'A') {
+            if (next.style.display !== 'none') has = true;
+            next = next.nextElementSibling;
+        }
+        g.style.display = has ? 'block' : 'none';
+    });
+}
+
+// Highlight active sidebar link on scroll
+var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+            var id = entry.target.id.replace('tbl-','');
+            document.querySelectorAll('.sidebar a').forEach(function(a){ a.classList.remove('active'); });
+            var link = document.querySelector('.sidebar a[href="#tbl-'+id+'"]');
+            if (link) link.classList.add('active');
+        }
+    });
+}, { rootMargin:'-80px 0px -60% 0px' });
+
+function exportXLSX() {
+    var wb = XLSX.utils.book_new();
+    for (var i = 0; i < TABLES.length; i++) {
+        var t = TABLES[i];
+        var data = [['Field Name', 'Type', 'Required', 'Constraints', 'Description']];
+        for (var j = 0; j < t.fields.length; j++) {
+            var f = t.fields[j];
+            var cons = f.constraints.filter(function(c){ return c !== 'req'; }).join('; ');
+            var req = f.required === true || f.required === 'required' || f.required === 'Yes' ? 'Yes' : 'No';
+            data.push([f.name, f.type, req, cons, f.desc || '']);
+        }
+        var ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{wch:22},{wch:18},{wch:10},{wch:18},{wch:50}];
+        XLSX.utils.book_append_sheet(wb, ws, t.name.substring(0, 31));
+    }
+    XLSX.writeFile(wb, 'HR_DataDictionary.xlsx');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    render();
+    TABLES.forEach(function(t) {
+        var el = document.getElementById('tbl-'+t.name);
+        if (el) observer.observe(el);
+    });
+});
+</script>
+</body>
+</html>
