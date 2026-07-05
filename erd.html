@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR System - ERD and Process Flow</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js">
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0f0f23;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            padding: 20px 24px;
+        }
+        h1 { text-align: center; font-size: 26px; }
+        h1 span { color: #e94560; }
+        .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 28px; }
+        .tabs {
+            display: flex; flex-wrap: wrap; gap: 4px;
+            justify-content: center; margin-bottom: 24px;
+        }
+        .tab-btn {
+            padding: 8px 18px; border: 1px solid #2a2a4a;
+            border-radius: 6px; background: #1a1a3e; color: #aaa;
+            cursor: pointer; font-size: 13px; transition: all .2s;
+        }
+        .tab-btn:hover { background: #2a2a5e; color: #fff; }
+        .tab-btn.active { background: #e94560; color: #fff; border-color: #e94560; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .diagram-box {
+            background: #151530; border-radius: 10px;
+            padding: 16px 12px 12px; border: 1px solid #252545;
+            overflow-x: auto; margin-bottom: 12px; min-height: 100px;
+        }
+        .diagram-box svg {
+            max-width: 100%;
+            max-height: 70vh;
+            width: auto;
+            height: auto;
+        }
+        .diagram-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: #e94560; }
+        .diagram-desc { font-size: 13px; color: #999; margin-bottom: 14px; }
+        .process-steps {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            justify-content: center; margin: 18px 0 8px;
+            padding: 16px; background: #10102a;
+            border-radius: 8px; border: 1px solid #252545;
+        }
+        .step { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .step-num {
+            background: #e94560; color: #fff; width: 22px; height: 22px;
+            border-radius: 50%; display: inline-flex; align-items: center;
+            justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
+        }
+        .step-text { color: #ccc; }
+        .step-arrow { color: #555; font-size: 16px; }
+        .footer { text-align: center; color: #444; font-size: 12px; margin-top: 24px; }
+        .error-box {
+            background: #2a1515; border: 1px solid #e94560; border-radius: 8px;
+            padding: 12px 16px; margin-bottom: 12px; font-size: 13px; color: #ff8888; display: none;
+            white-space: pre-wrap;
+        }
+        .loading { text-align: center; color: #666; padding: 20px; font-size: 14px; }
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .tab-btn { font-size: 12px; padding: 6px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1><span>HR</span> System - ERD and Process Flow</h1>
+    <p class="subtitle">Click a tab to explore each domain</p>
+
+    <div id="errorBox" class="error-box"></div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="overview">Overview</button>
+        <button class="tab-btn" data-tab="role-permission">Role and Permission</button>
+        <button class="tab-btn" data-tab="org">Company and Org</button>
+        <button class="tab-btn" data-tab="attendance">Attendance</button>
+        <button class="tab-btn" data-tab="leave">Leave</button>
+        <button class="tab-btn" data-tab="payroll">Payroll and Eval</button>
+        <button class="tab-btn" data-tab="assets">Expense and Assets</button>
+        <button class="tab-btn" data-tab="flow">Process Flow</button>
+    </div>
+
+    <div id="tab-overview" class="tab-content active">
+        <div class="diagram-title">Full Entity Overview</div>
+        <div class="diagram-desc">All 17 entities and their relationships.</div>
+        <div class="diagram-box" id="diagram-overview"><div class="loading">Rendering...</div></div>
+        <div class="process-steps">
+            <span class="step"><span class="step-num">1</span><span class="step-text">Company</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">2</span><span class="step-text">Branch</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">3</span><span class="step-text">Role</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">4</span><span class="step-text">Department</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">5</span><span class="step-text">Employee</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">6</span><span class="step-text">User</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">7</span><span class="step-text">Attendance / Leave / Payroll</span></span>
+        </div>
+    </div>
+
+    <div id="tab-role-permission" class="tab-content">
+        <div class="diagram-title">Role and Permission</div>
+        <div class="diagram-desc">How roles and permissions attach to users.</div>
+        <div class="diagram-box" id="diagram-role"><div class="loading">Rendering...</div></div>
+        <div class="process-steps">
+            <span class="step"><span class="step-num">1</span><span class="step-text">Create Role</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">2</span><span class="step-text">Set permissions</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">3</span><span class="step-text">Create User</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">4</span><span class="step-text">Assign roleId</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">5</span><span class="step-text">User inherits permissions</span></span>
+        </div>
+    </div>
+
+    <div id="tab-org" class="tab-content">
+        <div class="diagram-title">Company and Organization Structure</div>
+        <div class="diagram-desc">Company holds global settings. Branch inherits schedules. Department organizes Employees.</div>
+        <div class="diagram-box" id="diagram-org"><div class="loading">Rendering...</div></div>
+        <div class="process-steps">
+            <span class="step"><span class="step-num">1</span><span class="step-text">Create Company</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">2</span><span class="step-text">Set work hours</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">3</span><span class="step-text">Create Branch</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">4</span><span class="step-text">Create Department</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">5</span><span class="step-text">Add Employee</span></span>
+        </div>
+    </div>
+
+    <div id="tab-attendance" class="tab-content">
+        <div class="diagram-title">Attendance</div>
+        <div class="diagram-desc">Employees check in and out daily. Created by a User, approved by a supervisor.</div>
+        <div class="diagram-box" id="diagram-attendance"><div class="loading">Rendering...</div></div>
+        <div class="process-steps">
+            <span class="step"><span class="step-num">1</span><span class="step-text">Employee arrives</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">2</span><span class="step-text">Create Attendance (Check-in)</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">3</span><span class="step-text">Employee leaves</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">4</span><span class="step-text">Create Attendance (Check-out)</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">5</span><span class="step-text">Supervisor approves</span></span>
+        </div>
+    </div>
+
+    <div id="tab-leave" class="tab-content">
+        <div class="diagram-title">Leave Management</div>
+        <div class="diagram-desc">Employees request time off, referencing a LeaveType, going through approval.</div>
+        <div class="diagram-box" id="diagram-leave"><div class="loading">Rendering...</div></div>
+        <div class="process-steps">
+            <span class="step"><span class="step-num">1</span><span class="step-text">Define LeaveTypes</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">2</span><span class="step-text">Employee submits leave</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">3</span><span class="step-text">Status = pending</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">4</span><span class="step-text">Supervisor approves/rejects</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">5</span><span class="step-text">Status = approved/rejected</span></span>
+        </div>
+    </div>
+
+    <div id="tab-payroll" class="tab-content">
+        <div class="diagram-title">Payroll and Evaluation</div>
+        <div class="diagram-desc">Payroll batch-processes payments. Evaluations track performance periodically.</div>
+        <div class="diagram-box" id="diagram-payroll"><div class="loading">Rendering...</div></div>
+        <div class="process-steps">
+            <span class="step"><span class="step-num">1</span><span class="step-text">Confirm employees</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">2</span><span class="step-text">Create Payroll batch</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">3</span><span class="step-text">Approve</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">4</span><span class="step-text">Process payments</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">5</span><span class="step-text">Create Evaluation (separate cycle)</span></span>
+        </div>
+    </div>
+
+    <div id="tab-assets" class="tab-content">
+        <div class="diagram-title">Expense and Asset Management</div>
+        <div class="diagram-desc">Expenses track spending by type. Assets are physical items classified by Category.</div>
+        <div class="diagram-box" id="diagram-assets"><div class="loading">Rendering...</div></div>
+        <div class="process-steps">
+            <span class="step"><span class="step-num">1</span><span class="step-text">Create ExpenseType / Category</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">2</span><span class="step-text">Record Expense or Asset</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">3</span><span class="step-text">Approve if needed</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num">4</span><span class="step-text">Track transactions</span></span>
+        </div>
+    </div>
+
+    <div id="tab-flow" class="tab-content">
+        <div class="diagram-title">End-to-End Process Flow</div>
+        <div class="diagram-desc">Complete sequence for setting up and running the HR system.</div>
+        <div class="diagram-box" id="diagram-flow"><div class="loading">Rendering...</div></div>
+        <div class="process-steps">
+            <span class="step"><span class="step-num" style="background:#e94560">P1</span><span class="step-text">Setup</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num" style="background:#e94560">P2</span><span class="step-text">People</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num" style="background:#0f3460">P3</span><span class="step-text">Daily</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num" style="background:#0f3460">P4</span><span class="step-text">Periodic</span></span>
+            <span class="step-arrow">&gt;</span>
+            <span class="step"><span class="step-num" style="background:#0f3460">P5</span><span class="step-text">Tracking</span></span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Entities: 17 | Relationships: 20+ | Built from Mongoose schemas
+    </div>
+
+    <script>
+    var E = document.getElementById('errorBox');
+
+    function showError(msg) {
+        E.style.display = 'block';
+        E.textContent += msg + '\n---\n';
+    }
+
+    // All diagram definitions
+    var DIAGRAMS = {
+        overview: {
+            title: 'Overview',
+            code: [
+                "erDiagram",
+                "  Company ||--o{ Branch : \"has\"",
+                "  Branch ||--o{ Employee : \"employs\"",
+                "  Branch ||--o{ User : \"has users\"",
+                "  Branch ||--o{ Attendance : \"records\"",
+                "  Branch ||--o{ PermissionLeave : \"manages\"",
+                "  Branch ||--o{ Payroll : \"processes\"",
+                "  Branch ||--o{ Expense : \"tracks\"",
+                "  Branch ||--o{ CompanyAsset : \"owns\"",
+                "  Department ||--o{ Employee : \"belongs to\"",
+                "  Role ||--o{ User : \"assigned to\"",
+                "  User }o--|| User : \"reports to\"",
+                "  User ||--o{ Attendance : \"created approved by\"",
+                "  User ||--o{ PermissionLeave : \"approved by\"",
+                "  User ||--o{ Payroll : \"processed by\"",
+                "  User ||--o{ Evaluation : \"created by\"",
+                "  User ||--o{ Expense : \"created by\"",
+                "  Employee ||--o{ Attendance : \"has\"",
+                "  Employee ||--o{ PermissionLeave : \"requests\"",
+                "  Employee ||--o{ Evaluation : \"evaluated\"",
+                "  Employee ||--o{ Payroll : \"paid via\"",
+                "  LeaveType ||--o{ PermissionLeave : \"categorizes\"",
+                "  Expense ||--|| ExpenseType : \"typed by\"",
+                "  Category ||--o{ CompanyAsset : \"classifies\""
+            ].join('\n')
+        },
+        role: {
+            title: 'Role and Permission',
+            code: [
+                "erDiagram",
+                "  Role ||--o{ User : \"assigned to\"",
+                "  Role {",
+                "    ObjectId _id",
+                "    string name",
+                "    string representativeName",
+                "    map permission",
+                "    map controlStaff",
+                "    array accessSystem",
+                "    string branchId",
+                "  }",
+                "  User }o--|| User : \"reports to\"",
+                "  User {",
+                "    ObjectId _id",
+                "    string username",
+                "    string email",
+                "    string displayName",
+                "    array branchId",
+                "    ObjectId roleId",
+                "    array chiefIds",
+                "    string mainRole",
+                "    boolean status",
+                "    string employeeId",
+                "  }",
+                "  Branch ||--o{ User : \"belongs to\"",
+                "  Branch {",
+                "    ObjectId _id",
+                "    string name",
+                "    string abbreviation",
+                "    string ceoId",
+                "    string bmId",
+                "    string dbmId",
+                "  }"
+            ].join('\n')
+        },
+        org: {
+            title: 'Company and Org',
+            code: [
+                "erDiagram",
+                "  Company ||--o{ Branch : \"has\"",
+                "  Company {",
+                "    ObjectId _id",
+                "    string name",
+                "    string directorName",
+                "    string contact",
+                "    string logoUrl",
+                "    string slogan",
+                "    number rangGaveEmployeeSaoThun",
+                "    map workDay",
+                "    date startWorkHour",
+                "    date breakTime",
+                "    date comeBackHour",
+                "    date endWorkHour",
+                "    array bonuses",
+                "  }",
+                "  Branch ||--o{ Department : \"organizes\"",
+                "  Branch {",
+                "    ObjectId _id",
+                "    string name",
+                "    string abbreviation",
+                "    string directorName",
+                "    string contact",
+                "    string ceoId",
+                "    string bmId",
+                "    string dbmId",
+                "    ObjectId baseCurrencyId",
+                "    map workDay",
+                "    string city",
+                "    number lat",
+                "    number lon",
+                "    boolean status",
+                "  }",
+                "  Department ||--o{ Employee : \"contains\"",
+                "  Department {",
+                "    ObjectId _id",
+                "    string name",
+                "    string description",
+                "    boolean status",
+                "  }",
+                "  Employee {",
+                "    string _id",
+                "    string khName",
+                "    string enName",
+                "    string position",
+                "    string branchId",
+                "    map department",
+                "    date joiningDate",
+                "    string status",
+                "    string contract",
+                "    date terminationDate",
+                "  }"
+            ].join('\n')
+        },
+        attendance: {
+            title: 'Attendance',
+            code: [
+                "erDiagram",
+                "  Employee ||--o{ Attendance : \"checks in out\"",
+                "  Attendance {",
+                "    ObjectId _id",
+                "    string branchId",
+                "    string employeeId",
+                "    string employeeName",
+                "    string typeOfCheck",
+                "    map checkIn",
+                "    map checkOut",
+                "    map department",
+                "    map statusAttendance",
+                "    array chiefIds",
+                "    string status",
+                "    string reason",
+                "    string createdBy",
+                "    string approvedBy",
+                "    date approvedDate",
+                "  }",
+                "  User ||--o{ Attendance : \"creates approves\"",
+                "  Attendance }o--|| Branch : \"belongs to\""
+            ].join('\n')
+        },
+        leave: {
+            title: 'Leave',
+            code: [
+                "erDiagram",
+                "  Employee ||--o{ PermissionLeave : \"requests\"",
+                "  PermissionLeave {",
+                "    ObjectId _id",
+                "    string branchId",
+                "    string employeeId",
+                "    string employeeName",
+                "    map leaveType",
+                "    string durationType",
+                "    number durationValue",
+                "    string halfDayPart",
+                "    date startDate",
+                "    date endDate",
+                "    date startHour",
+                "    date endHour",
+                "    number numberOfDay",
+                "    string reason",
+                "    string status",
+                "    string createdBy",
+                "    string approvedBy",
+                "    date approvedDate",
+                "    array chiefIds",
+                "  }",
+                "  LeaveType ||--o{ PermissionLeave : \"categorizes\"",
+                "  LeaveType {",
+                "    ObjectId _id",
+                "    string title",
+                "    boolean status",
+                "    boolean isLeaveYearType",
+                "    string description",
+                "  }",
+                "  User ||--o{ PermissionLeave : \"approves\"",
+                "  PermissionLeave }o--|| Branch : \"belongs to\""
+            ].join('\n')
+        },
+        payroll: {
+            title: 'Payroll and Evaluation',
+            code: [
+                "erDiagram",
+                "  Employee ||--o{ Payroll : \"paid in\"",
+                "  Payroll {",
+                "    ObjectId _id",
+                "    string branchId",
+                "    array employeeIds",
+                "    date paymentDate",
+                "    array payments",
+                "    string status",
+                "    string payrollEpisode",
+                "    string approvedBy",
+                "    string createdBy",
+                "    string description",
+                "    array terminationEmpIds",
+                "  }",
+                "  Employee ||--o{ Evaluation : \"evaluated\"",
+                "  Evaluation {",
+                "    ObjectId _id",
+                "    string employeeId",
+                "    string branchId",
+                "    date evaluationPeriod",
+                "    date evaluationDate",
+                "    array evaluations",
+                "    string evaluationStatus",
+                "    date nextEvaluationDate",
+                "    date alertEvaluationDate",
+                "    map comments",
+                "    string createdBy",
+                "  }",
+                "  User ||--o{ Payroll : \"processes\"",
+                "  User ||--o{ Evaluation : \"creates\"",
+                "  Payroll }o--|| Branch : \"belongs to\"",
+                "  Evaluation }o--|| Branch : \"belongs to\""
+            ].join('\n')
+        },
+        assets: {
+            title: 'Expense and Assets',
+            code: [
+                "erDiagram",
+                "  Expense ||--|| ExpenseType : \"typed by\"",
+                "  Expense {",
+                "    ObjectId _id",
+                "    string branchId",
+                "    number amount",
+                "    map expenseType",
+                "    boolean isApproved",
+                "    string createdBy",
+                "    string approvedBy",
+                "    date approvedDate",
+                "  }",
+                "  ExpenseType {",
+                "    ObjectId _id",
+                "    string title",
+                "    string branchId",
+                "    boolean status",
+                "    string createdBy",
+                "  }",
+                "  Category ||--o{ CompanyAsset : \"classifies\"",
+                "  Category {",
+                "    ObjectId _id",
+                "    string name",
+                "    boolean status",
+                "    string description",
+                "    array subCategory",
+                "  }",
+                "  CompanyAsset {",
+                "    ObjectId _id",
+                "    string assetName",
+                "    string branchId",
+                "    string categoryId",
+                "    number value",
+                "    string status",
+                "    string department",
+                "  }",
+                "  Branch ||--o{ CompanyAsset : \"owns\"",
+                "  Branch ||--o{ Expense : \"tracks\""
+            ].join('\n')
+        },
+        flow: {
+            title: 'Process Flow',
+            code: [
+                "flowchart TB",
+                "  subgraph Setup[Phase 1: Setup]",
+                "    A[Create Company] --> B[Create Branch]",
+                "    B --> C[Create Department]",
+                "    C --> D[Create LeaveType + ExpenseType + Category]",
+                "    D --> E[Create Role with Permissions]",
+                "  end",
+                "",
+                "  subgraph People[Phase 2: People]",
+                "    E --> F[Add Employee]",
+                "    F --> G[Create User and assign Role]",
+                "    G --> H[Link User to Employee]",
+                "  end",
+                "",
+                "  subgraph Daily[Phase 3: Daily Operations]",
+                "    H --> I[Attendance Check-in Check-out]",
+                "    H --> J[Submit Leave Request]",
+                "    I --> K[Supervisor approves Attendance]",
+                "    J --> K2[Supervisor approves Leave]",
+                "  end",
+                "",
+                "  subgraph Periodic[Phase 4: Periodic]",
+                "    H --> L[Run Payroll]",
+                "    H --> M[Create Evaluation]",
+                "    L --> N[Approve Payroll and Process Payments]",
+                "  end",
+                "",
+                "  subgraph Tracking[Phase 5: Tracking]",
+                "    H --> O[Record Expense]",
+                "    H --> P[Register Company Asset]",
+                "    O --> Q[Approve Expense]",
+                "    P --> R[Asset Transaction History]",
+                "  end",
+                "",
+                "  style Setup fill:#1a1a3e,stroke:#e94560,color:#fff",
+                "  style People fill:#1a1a3e,stroke:#e94560,color:#fff",
+                "  style Daily fill:#151538,stroke:#0f3460,color:#fff",
+                "  style Periodic fill:#151538,stroke:#0f3460,color:#fff",
+                "  style Tracking fill:#151538,stroke:#0f3460,color:#fff"
+            ].join('\n')
+        }
+    };
+
+    async function renderDiagram(id) {
+        var def = DIAGRAMS[id];
+        var target = document.getElementById('diagram-' + id);
+        if (!target) return;
+        target.innerHTML = '<div class="loading">Rendering...</div>';
+
+        try {
+            var result = await mermaid.render('mermaid-' + id, def.code);
+            target.innerHTML = result.svg;
+            var svg = target.querySelector('svg');
+            if (svg) {
+                svg.style.maxWidth = '100%';
+                svg.style.maxHeight = '70vh';
+                svg.style.width = 'auto';
+                svg.style.height = 'auto';
+            }
+        } catch (err) {
+            target.innerHTML = '<div style="color:#ff8888;padding:10px;">Render error: ' + err.message + '</div>';
+            showError('Diagram "' + def.title + '": ' + err.message);
+        }
+    }
+
+    async function renderAll() {
+        for (var id in DIAGRAMS) {
+            await renderDiagram(id);
+        }
+    }
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+            document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+            this.classList.add('active');
+            var tabId = 'tab-' + this.dataset.tab;
+            document.getElementById(tabId).classList.add('active');
+            // Re-render this tab
+            var diagramId = this.dataset.tab;
+            renderDiagram(diagramId).catch(function(e) {});
+        });
+    });
+
+    // Init on load
+    mermaid.initialize({
+        theme: 'dark',
+        themeVariables: {
+            primaryColor: '#e94560',
+            primaryBorderColor: '#e94560',
+            primaryTextColor: '#fff',
+            lineColor: '#3a3a6a',
+            secondaryColor: '#1a1a3e',
+            tertiaryColor: '#151530',
+            clusterBkg: '#151538',
+            clusterBorder: '#2a2a5a',
+            nodeBorder: '#2a2a5a',
+            mainBkg: '#1a1a3e'
+        },
+        er: {
+            layoutDirection: 'TB',
+            entityPadding: 12,
+            fontSize: 12.5,
+            stroke: '#3a3a6a'
+        },
+        flowchart: {
+            curve: 'basis',
+            padding: 12,
+            nodeSpacing: 60,
+            rankSpacing: 80
+        }
+    });
+
+    renderAll();
+    </script>
+</body>
+</html>
