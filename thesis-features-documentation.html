@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Attendance Management System — Thesis Documentation</title>
+<style>
+  :root {
+    --primary: #1B6B1A;
+    --primary-light: #2d9e2b;
+    --primary-dark: #145013;
+    --bg: #f8f9fa;
+    --sidebar-bg: #1a1a2e;
+    --sidebar-text: #c4c4d4;
+    --sidebar-active: #1B6B1A;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-light: #6c757d;
+    --border: #dee2e6;
+    --code-bg: #f1f3f5;
+    --table-stripe: #f8f9fa;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+    --radius: 8px;
+    --transition: 0.3s ease;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 280px;
+    min-height: 100vh;
+    background: var(--sidebar-bg);
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    z-index: 100;
+    transition: var(--transition);
+    padding-bottom: 2rem;
+  }
+
+  .sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .sidebar-header h2 {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .sidebar-header span {
+    color: var(--primary-light);
+  }
+
+  .sidebar nav { padding: 0.75rem 0; }
+
+  .sidebar nav a {
+    display: block;
+    padding: 0.5rem 1.5rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+  }
+
+  .sidebar nav a:hover,
+  .sidebar nav a.active {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    border-left-color: var(--sidebar-active);
+  }
+
+  .sidebar nav a .nav-icon {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+    display: inline-block;
+    width: 1.2rem;
+    text-align: center;
+  }
+
+  .nav-group-title {
+    padding: 1rem 1.5rem 0.3rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255,255,255,0.3);
+    font-weight: 600;
+  }
+
+  /* Search */
+  .search-box {
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-size: 0.85rem;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .search-box input::placeholder { color: rgba(255,255,255,0.3); }
+  .search-box input:focus { border-color: var(--primary-light); background: rgba(255,255,255,0.08); }
+
+  .search-results {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--sidebar-bg);
+    max-height: 300px;
+    overflow-y: auto;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    z-index: 200;
+  }
+
+  .search-results a {
+    padding: 0.4rem 1.5rem !important;
+    font-size: 0.8rem !important;
+    border-left: none !important;
+  }
+
+  /* Main Content */
+  .main {
+    margin-left: 280px;
+    flex: 1;
+    min-height: 100vh;
+    padding: 2rem 3rem;
+    max-width: 1100px;
+  }
+
+  /* Header */
+  .page-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    padding: 2.5rem 2rem;
+    border-radius: var(--radius);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .page-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-header p {
+    opacity: 0.9;
+    font-size: 1rem;
+  }
+
+  .page-header .meta {
+    margin-top: 1rem;
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  /* Section */
+  .section {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .section-header {
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    user-select: none;
+    transition: var(--transition);
+    background: var(--card-bg);
+  }
+
+  .section-header:hover { background: #f0fdf0; }
+
+  .section-header h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-header .icon {
+    font-size: 1.2rem;
+  }
+
+  .section-header .toggle {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    transition: transform 0.3s;
+  }
+
+  .section.collapsed .toggle { transform: rotate(-90deg); }
+  .section.collapsed .section-body { display: none; }
+
+  .section-body {
+    padding: 0 1.5rem 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Subsection */
+  .subsection {
+    margin-top: 1.25rem;
+  }
+
+  .subsection h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid #e8f5e9;
+  }
+
+  .subsection h4 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 1rem 0 0.5rem;
+  }
+
+  /* Tables */
+  .table-wrapper {
+    overflow-x: auto;
+    margin: 0.75rem 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  thead th {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tbody tr:nth-child(even) { background: var(--table-stripe); }
+  tbody tr:hover { background: #e8f5e9; }
+
+  /* Code / Inline Code */
+  code {
+    background: var(--code-bg);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.82rem;
+    color: #d63384;
+    border: 1px solid #e9ecef;
+  }
+
+  .code-block {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    margin: 0.75rem 0;
+  }
+
+  .code-block .comment { color: #6c7086; }
+  .code-block .keyword { color: #cba6f7; }
+  .code-block .string { color: #a6e3a1; }
+  .code-block .number { color: #fab387; }
+
+  /* Badge */
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-green { background: #d4edda; color: #155724; }
+  .badge-blue { background: #d1ecf1; color: #0c5460; }
+  .badge-orange { background: #fff3cd; color: #856404; }
+  .badge-red { background: #f8d7da; color: #721c24; }
+  .badge-purple { background: #e8daef; color: #4a235a; }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #f0fdf0, #fff);
+    border: 1px solid #c8e6c9;
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .stat-card .number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+
+  .stat-card .label {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+  }
+
+  /* Architecture Diagram */
+  .arch-diagram {
+    background: #fafbfc;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    text-align: center;
+    font-family: 'SF Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+
+  /* Lists */
+  ul, ol {
+    padding-left: 1.2rem;
+    margin: 0.5rem 0;
+  }
+
+  li { margin-bottom: 0.3rem; font-size: 0.88rem; }
+  li strong { color: var(--primary-dark); }
+
+  /* Feature Card Grid */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .feature-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    transition: var(--transition);
+  }
+
+  .feature-card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+  }
+
+  .feature-card h4 {
+    color: var(--primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .feature-card p {
+    font-size: 0.82rem;
+    color: var(--text-light);
+  }
+
+  .feature-card ul {
+    margin-top: 0.4rem;
+    padding-left: 1rem;
+  }
+
+  .feature-card li {
+    font-size: 0.8rem;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    position: relative;
+    border-bottom: 1px dashed var(--primary);
+    cursor: help;
+  }
+
+  .tooltip:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 50;
+    pointer-events: none;
+  }
+
+  /* Print */
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 1rem; }
+    .section.collapsed .section-body { display: block !important; }
+    .page-header { background: var(--primary) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section { break-inside: avoid; }
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .sidebar { width: 0; overflow: hidden; }
+    .sidebar.open { width: 280px; }
+    .main { margin-left: 0; padding: 1rem; }
+    .mobile-toggle { display: block !important; }
+    .page-header .meta { flex-direction: column; gap: 0.3rem; }
+  }
+
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 200;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+
+  /* Back to top */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transition: var(--transition);
+    z-index: 90;
+  }
+
+  .back-to-top.visible { opacity: 1; }
+
+  .highlight { background: #fff59d; padding: 0 2px; border-radius: 2px; }
+
+  .p-15 { padding: 1.5rem; }
+</style>
+</head>
+<body>
+
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <h2><span>HR Attendance</span><br>Management System</h2>
+  </div>
+  <div class="search-box" style="position:relative;">
+    <input type="text" id="searchInput" placeholder="Search features..." oninput="handleSearch(this.value)">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <nav>
+    <div class="nav-group-title">Overview</div>
+    <a href="#architecture"><span class="nav-icon">&#9670;</span>Architecture Overview</a>
+    <a href="#tech-stack"><span class="nav-icon">&#9670;</span>Technology Stack</a>
+    <a href="#key-metrics"><span class="nav-icon">&#9670;</span>Key Metrics</a>
+
+    <div class="nav-group-title">Backend</div>
+    <a href="#backend-overview"><span class="nav-icon">&#9670;</span>Backend Overview</a>
+    <a href="#api-endpoints"><span class="nav-icon">&#9670;</span>API Endpoints</a>
+    <a href="#controllers"><span class="nav-icon">&#9670;</span>Controllers</a>
+    <a href="#services"><span class="nav-icon">&#9670;</span>Services</a>
+    <a href="#security"><span class="nav-icon">&#9670;</span>Security Features</a>
+    <a href="#integrations"><span class="nav-icon">&#9670;</span>External Integrations</a>
+
+    <div class="nav-group-title">Frontend (Web)</div>
+    <a href="#web-overview"><span class="nav-icon">&#9670;</span>Web Dashboard Overview</a>
+    <a href="#web-pages"><span class="nav-icon">&#9670;</span>Pages &amp; Views</a>
+    <a href="#web-components"><span class="nav-icon">&#9670;</span>Components</a>
+    <a href="#web-composables"><span class="nav-icon">&#9670;</span>Composables &amp; Services</a>
+    <a href="#web-features"><span class="nav-icon">&#9670;</span>Key Frontend Features</a>
+
+    <div class="nav-group-title">Mobile App</div>
+    <a href="#mobile-overview"><span class="nav-icon">&#9670;</span>Mobile App Overview</a>
+    <a href="#mobile-screens"><span class="nav-icon">&#9670;</span>Screens &amp; Features</a>
+    <a href="#mobile-services"><span class="nav-icon">&#9670;</span>Services</a>
+    <a href="#mobile-specific"><span class="nav-icon">&#9670;</span>Mobile-Specific Features</a>
+
+    <div class="nav-group-title">Data &amp; Modules</div>
+    <a href="#database"><span class="nav-icon">&#9670;</span>Database Schema</a>
+    <a href="#modules"><span class="nav-icon">&#9670;</span>10 Major Modules</a>
+    <a href="#file-structure"><span class="nav-icon">&#9670;</span>File Structure</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- Page Header -->
+  <header class="page-header" id="top">
+    <h1>HR Attendance Management System</h1>
+    <p>Full-Stack Thesis Documentation — Backend, Frontend &amp; Mobile</p>
+    <div class="meta">
+      <span>&#128100; Author: Phors Stephen (SnoopyGenZ)</span>
+      <span>&#128197; Date: 2026</span>
+      <span>&#128230; 3 Applications &bull; 50+ Collections &bull; 48 API Endpoints</span>
+    </div>
+  </header>
+
+  <!-- ============================================ -->
+  <!-- ARCHITECTURE OVERVIEW -->
+  <!-- ============================================ -->
+  <div class="section" id="architecture">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#127959;</span> Architecture Overview</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <p>The system is a full-stack, multi-platform HR solution consisting of <strong>3 applications</strong> connected via REST API and Socket.IO for real-time communication.</p>
+
+      <div class="arch-diagram">
+<pre style="text-align:left; display:inline-block;">
+  <span style="color:#2ecc71;font-weight:bold;">Flutter App</span>   <span style="color:#3498db;font-weight:bold;">Vue.js Web App</span>   <span style="color:#e67e22;font-weight:bold;">Telegram Bots</span>
+       |               |                |
+       +-------+-------+-------+--------+
+                       |
+              <span style="color:#e74c3c;font-weight:bold;">Socket.IO</span> (real-time bidirectional)
+                       |
+          <span style="color:#9b59b6;font-weight:bold;">Express.js REST API</span> (Port 4000)
+   +------+------+------+------+------+
+   |      |      |      |      |      |
+  JWT   Nodemailer Firebase  Telegram  Google
+  Auth   (OTP)   (FCM)      Bot      Vision
+                       |
+              <span style="color:#1abc9c;font-weight:bold;">MongoDB</span> (hrsystem)
+                       |
+                 <span style="color:#95a5a6;">50+ Collections</span>
+</pre>
+      </div>
+
+      <div class="subsection">
+        <h3>Key Architecture Decisions</h3>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h4>&#128268; Generic CRUD Pattern</h4>
+            <p>Single dynamic route handles all CRUD for 60+ collections — no duplicate route/controller pairs.</p>
+          </div>
+          <div class="feature-card">
+            <h4>&#9889; Real-Time Broadcasting</h4>
+            <p>Any data mutation triggers Socket.IO <code>dataUpdate</code> to all connected clients.</p>
+          </div>
+          <div class="feature-card">
+            <h4>&#128336; Server-Side Timestamps</h4>
+            <p>All time operations use server time in Asia/Phnom_Penh — prevents clock manipulation.</p>
+          </div>
+          <div class="feature-card">
+            <h4>&#128205; Haversine GPS Verification</h4>
+            <p>Check-in only valid if employee is within 100m of a registered location.</p>
+          </div>
+          <div class="feature-card">
+            <h4>&#128274; Progressive Account Lockout</h4>
+            <p>5 failed attempts → exponential lockout: 15min, 30min, 60min.</p>
+          </div>
+          <div class="feature-card">
+            <h4>&#127760; Bilingual Support</h4>
+            <p>All entities have dual fields: nameKh / nameEn. 312 translation keys in mobile.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- TECHNOLOGY STACK -->
+  <!-- ============================================ -->
+  <div class="section" id="tech-stack">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#9881;</span> Technology Stack</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="subsection">
+        <h3>Backend (Node.js / Express)</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Technology</th><th>Version</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Node.js + Express.js</strong></td><td>4.21.1</td><td>REST API framework</td></tr>
+              <tr><td><strong>MongoDB + Mongoose</strong></td><td>8.8.3</td><td>Database + ODM</td></tr>
+              <tr><td><strong>Socket.IO</strong></td><td>4.8.0</td><td>Real-time communication</td></tr>
+              <tr><td><strong>JWT (jsonwebtoken)</strong></td><td>9.0.2</td><td>Authentication tokens</td></tr>
+              <tr><td><strong>bcrypt</strong></td><td>5.1.1</td><td>Password hashing</td></tr>
+              <tr><td><strong>Firebase Admin SDK</strong></td><td>13.1.0</td><td>Push notifications (3 projects)</td></tr>
+              <tr><td><strong>Google Cloud Vision</strong></td><td>5.1.0</td><td>OCR for ID card reading</td></tr>
+              <tr><td><strong>Redis (ioredis)</strong></td><td>5.7.0</td><td>Caching layer</td></tr>
+              <tr><td><strong>Telegram Bot API</strong></td><td>0.66.0</td><td>Bot messaging per branch</td></tr>
+              <tr><td><strong>Nodemailer</strong></td><td>9.0.3</td><td>OTP email delivery</td></tr>
+              <tr><td><strong>Helmet.js</strong></td><td>8.0.0</td><td>HTTP security headers</td></tr>
+              <tr><td><strong>express-rate-limit</strong></td><td>7.5.0</td><td>Request throttling</td></tr>
+              <tr><td><strong>node-cron</strong></td><td>4.5.0</td><td>Meeting status auto-update</td></tr>
+              <tr><td><strong>Puppeteer</strong></td><td>23.9.0</td><td>PDF generation</td></tr>
+              <tr><td><strong>moment-timezone</strong></td><td>0.5.46</td><td>Timezone handling (Phnom Penh)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Frontend — Vue.js Web Dashboard</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Technology</th><th>Version</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Vue.js</strong></td><td>3.x</td><td>UI framework</td></tr>
+              <tr><td><strong>Vue Router</strong></td><td>4.x</td><td>Client-side routing (120 routes)</td></tr>
+              <tr><td><strong>Pinia + Persisted State</strong></td><td>3.0.3</td><td>State management with localStorage</td></tr>
+              <tr><td><strong>PrimeVue</strong></td><td>4.3.7</td><td>Component library</td></tr>
+              <tr><td><strong>Tailwind CSS</strong></td><td>3.x</td><td>Utility CSS (green theme #1B6B1A)</td></tr>
+              <tr><td><strong>Chart.js + vue-chartjs</strong></td><td>4.5.1</td><td>Dashboard visualizations</td></tr>
+              <tr><td><strong>Leaflet</strong></td><td>1.9.4</td><td>Live employee GPS tracking map</td></tr>
+              <tr><td><strong>jsPDF + ExcelJS</strong></td><td>3.0.1 / 4.4.0</td><td>PDF &amp; Excel report export</td></tr>
+              <tr><td><strong>Socket.IO Client</strong></td><td>4.8.1</td><td>Real-time updates</td></tr>
+              <tr><td><strong>Firebase</strong></td><td>12.1.0</td><td>Push notifications</td></tr>
+              <tr><td><strong>vue3-lottie</strong></td><td>3.3.1</td><td>Animated loading states</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Mobile App — Flutter</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Technology</th><th>Version</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Flutter (Dart)</strong></td><td>>= 3.5.0</td><td>Cross-platform framework</td></tr>
+              <tr><td><strong>GetX</strong></td><td>4.7.2</td><td>State management, routing, DI</td></tr>
+              <tr><td><strong>Dio</strong></td><td>5.8.0</td><td>HTTP client</td></tr>
+              <tr><td><strong>geolocator</strong></td><td>14.0.0</td><td>GPS for geofencing</td></tr>
+              <tr><td><strong>mobile_scanner</strong></td><td>6.0.0</td><td>QR code scanning</td></tr>
+              <tr><td><strong>Firebase Core + Messaging</strong></td><td>3.13.1 / 15.2.4</td><td>Push notifications</td></tr>
+              <tr><td><strong>local_auth</strong></td><td>2.3.0</td><td>Biometric authentication</td></tr>
+              <tr><td><strong>Syncfusion SignaturePad</strong></td><td>30.1.41</td><td>Digital signatures</td></tr>
+              <tr><td><strong>socket_io_client</strong></td><td>3.0.2</td><td>Real-time updates</td></tr>
+              <tr><td><strong>video_player</strong></td><td>2.10.0</td><td>Training videos</td></tr>
+              <tr><td><strong>audioplayers</strong></td><td>6.4.0</td><td>Notification sounds</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- KEY METRICS -->
+  <!-- ============================================ -->
+  <div class="section" id="key-metrics">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128200;</span> Key Metrics</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="number">3</div><div class="label">Applications</div></div>
+        <div class="stat-card"><div class="number">50+</div><div class="label">MongoDB Collections</div></div>
+        <div class="stat-card"><div class="number">80+</div><div class="label">Mongoose Models</div></div>
+        <div class="stat-card"><div class="number">48</div><div class="label">API Endpoints</div></div>
+        <div class="stat-card"><div class="number">12</div><div class="label">Controllers</div></div>
+        <div class="stat-card"><div class="number">60+</div><div class="label">Vue.js Pages</div></div>
+        <div class="stat-card"><div class="number">120</div><div class="label">Routes</div></div>
+        <div class="stat-card"><div class="number">20+</div><div class="label">Flutter Screens</div></div>
+        <div class="stat-card"><div class="number">312</div><div class="label">Translation Keys</div></div>
+        <div class="stat-card"><div class="number">3</div><div class="label">Firebase Projects</div></div>
+        <div class="stat-card"><div class="number">5</div><div class="label">PM2 Instances</div></div>
+        <div class="stat-card"><div class="number">10</div><div class="label">Major Modules</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- BACKEND OVERVIEW -->
+  <!-- ============================================ -->
+  <div class="section" id="backend-overview">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128268;</span> Backend Overview</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <p>Node.js/Express monolithic server running on <strong>Port 4000</strong> with MongoDB, Socket.IO, and multiple external integrations.</p>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Component</th><th>File(s)</th><th>Lines</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>Entry Point</td><td><code>app.js</code></td><td>572</td><td>Server initialization, middleware, route mounting</td></tr>
+            <tr><td>Socket Server</td><td><code>socket.js</code></td><td>-</td><td>Socket.IO singleton for real-time events</td></tr>
+            <tr><td>Generic CRUD Route</td><td><code>dynamicRoute.js</code></td><td>-</td><td>Single route handles all 60+ collections</td></tr>
+            <tr><td>Data Controllers</td><td><code>useDataController.js</code></td><td>1400+</td><td>Write operations (insert/update/delete)</td></tr>
+            <tr><td>Read Controllers</td><td><code>getDataController.js</code></td><td>1500+</td><td>Read operations (getAll/getPagination/getNextId)</td></tr>
+            <tr><td>Models</td><td><code>models/</code> (80+ files)</td><td>-</td><td>Mongoose schemas for all collections</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="subsection">
+        <h3>Dynamic CRUD Pattern</h3>
+        <div class="code-block">
+<span class="comment">// Instead of separate routes for each collection:</span>
+<span class="comment">// POST /loan/api/insertDoc/:collectionName</span>
+<span class="comment">// POST /loan/api/updateDoc/:collectionName</span>
+<span class="comment">// POST /loan/api/deleteDoc/:collectionName</span>
+<span class="comment">// GET  /loan/api/getAllDocs/:collectionName</span>
+<span class="comment">// GET  /loan/api/getPagination/:collectionName</span>
+<span class="comment">// POST /loan/api/getNextId/:collectionName/:branchId</span>
+
+<span class="comment">// The modelMap maps 60+ collection names to Mongoose models:</span>
+<span class="keyword">const</span> modelMap = {
+  <span class="string">"user"</span>: UserModel,
+  <span class="string">"employee"</span>: EmployeeModel,
+  <span class="string">"attendance"</span>: AttendanceModel,
+  <span class="comment">// ... 60+ more mappings</span>
+};
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- API ENDPOINTS -->
+  <!-- ============================================ -->
+  <div class="section" id="api-endpoints">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128279;</span> API Endpoints (48 total)</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <p>All endpoints prefixed with <code>/loan/api</code></p>
+
+      <div class="subsection">
+        <h3>Authentication</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/login</code></td><td>Login with username/password, returns JWT. Progressive lockout on failures.</td></tr>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/logout</code></td><td>Invalidate session, clear FCM tokens</td></tr>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/verifyToken</code></td><td>Validate JWT token and return user data</td></tr>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/otp/send</code></td><td>Send 6-digit OTP to email (5-min expiry)</td></tr>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/otp/verify</code></td><td>Verify OTP code</td></tr>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/register</code></td><td>Create new user account</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Dynamic CRUD (Generic for 60+ collections)</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/insertDoc/:collection</code></td><td>Create new document in specified collection</td></tr>
+              <tr><td><span class="badge badge-orange">POST</span></td><td><code>/updateDoc/:collection</code></td><td>Update document by ID in specified collection</td></tr>
+              <tr><td><span class="badge badge-red">POST</span></td><td><code>/deleteDoc/:collection</code></td><td>Soft/hard delete document</td></tr>
+              <tr><td><span class="badge badge-blue">GET</span></td><td><code>/getAllDocs/:collection</code></td><td>Read with search, filter, sort, populate</td></tr>
+              <tr><td><span class="badge badge-blue">GET</span></td><td><code>/getPagination/:collection</code></td><td>Paginated read with filters</td></tr>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/getNextId/:collection/:branchId</code></td><td>Generate sequential branch-scoped ID</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Specialized Endpoints</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/verify-location</code></td><td>GPS check-in verification (Haversine formula, 100m radius)</td></tr>
+              <tr><td><span class="badge badge-blue">GET</span></td><td><code>/server-time</code></td><td>Server timestamp in Asia/Phnom_Penh timezone</td></tr>
+              <tr><td><span class="badge badge-blue">GET</span></td><td><code>/attendance/prediction</code></td><td>AI attendance risk prediction</td></tr>
+              <tr><td><span class="badge badge-blue">GET</span></td><td><code>/evaluation/stats/:id</code></td><td>Employee evaluation statistics</td></tr>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/send-notification</code></td><td>Firebase FCM push notification</td></tr>
+              <tr><td><span class="badge badge-blue">GET</span></td><td><code>/send-telegram</code></td><td>Send message via Telegram bot</td></tr>
+              <tr><td><span class="badge badge-green">POST</span></td><td><code>/analyze-image</code></td><td>Google Cloud Vision OCR for ID cards</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- CONTROLLERS -->
+  <!-- ============================================ -->
+  <div class="section" id="controllers">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128295;</span> Controllers (12 files, 4000+ lines)</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Controller</th><th>Lines</th><th>Key Functions</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>authController.js</strong></td><td>411</td>
+              <td><code>login()</code> — JWT + progressive lockout (5 attempts → 15/30/60 min exponential)<br><code>logout()</code>, <code>verifyToken()</code>, <code>sendOTP()</code>, <code>verifyOTP()</code>, <code>registerUser()</code></td>
+            </tr>
+            <tr>
+              <td><strong>useDataController.js</strong></td><td>1400+</td>
+              <td>Generic <code>insertDoc()</code>, <code>updateDoc()</code>, <code>deleteDoc()</code> — maps collection names to Mongoose models via modelMap</td>
+            </tr>
+            <tr>
+              <td><strong>getDataController.js</strong></td><td>1500+</td>
+              <td>Generic <code>getAllDocs()</code> with search/filter/sort, <code>getPagination()</code> with pagination, <code>getNextId()</code> for sequential IDs</td>
+            </tr>
+            <tr>
+              <td><strong>qrController.js</strong></td><td>69</td>
+              <td><code>verifyLocation()</code> — Haversine great-circle distance calculation for GPS verification</td>
+            </tr>
+            <tr>
+              <td><strong>visionController.js</strong></td><td>263</td>
+              <td><code>analyzeImage()</code> — Google Cloud Vision API for Cambodian ID card OCR</td>
+            </tr>
+            <tr>
+              <td><strong>timestampController.js</strong></td><td>-</td>
+              <td><code>getServerTime()</code> — returns server time in Asia/Phnom_Penh</td>
+            </tr>
+            <tr>
+              <td><strong>predictionController.js</strong></td><td>-</td>
+              <td><code>getPrediction()</code> — AI attendance risk scoring (day-of-week, holiday, weather, history)</td>
+            </tr>
+            <tr>
+              <td><strong>firebaseController.js</strong></td><td>-</td>
+              <td><code>sendNotification()</code> — Firebase FCM push to multiple tokens</td>
+            </tr>
+            <tr>
+              <td><strong>meetingController.js</strong></td><td>-</td>
+              <td>CRUD for meetings + auto-update status via cron</td>
+            </tr>
+            <tr>
+              <td><strong>telegramController.js</strong></td><td>-</td>
+              <td>Send messages/alerts via Telegram Bot API (per-branch)</td>
+            </tr>
+            <tr>
+              <td><strong>locationController.js</strong></td><td>-</td>
+              <td>Manage GPS check-in locations (create, list, update)</td>
+            </tr>
+            <tr>
+              <td><strong>purchaseController.js</strong></td><td>-</td>
+              <td>Company asset purchase management</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SERVICES -->
+  <!-- ============================================ -->
+  <div class="section" id="services">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#9881;</span> Backend Services</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>&#129504; predictionService.js</h4>
+          <p><strong>Heuristic ML Model</strong> for attendance risk prediction:</p>
+          <ul>
+            <li>Day-of-week pattern analysis</li>
+            <li>Holiday adjacency detection</li>
+            <li>Weather conditions (OpenWeatherMap API)</li>
+            <li>30-day attendance history scoring</li>
+            <li>Output: <span class="badge badge-green">Low</span> <span class="badge badge-orange">Medium</span> <span class="badge badge-red">High</span> risk</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <h4>&#127780; weatherService.js</h4>
+          <p>Fetches real-time weather data from <strong>OpenWeatherMap API</strong> to determine if weather conditions may affect employee attendance.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128231; emailService.js</h4>
+          <p><strong>Nodemailer/Gmail SMTP</strong> for OTP email delivery. Generates 6-digit code with 5-minute expiry. Used for two-factor authentication.</p>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Utilities</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Utility</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>getNextId.js</strong></td><td>Branch-scoped sequential ID generation (e.g., BR000001, BR000002)</td></tr>
+              <tr><td><strong>numberId.js</strong></td><td>Number formatting utilities</td></tr>
+              <tr><td><strong>cryption.js</strong></td><td>AES encryption/decryption operations</td></tr>
+              <tr><td><strong>authMiddleware.js</strong></td><td>JWT token verification + API Bearer token verification</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SECURITY -->
+  <!-- ============================================ -->
+  <div class="section" id="security">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128274;</span> Security Features</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>&#128273; JWT Authentication</h4>
+          <p>Stateless token-based authentication with expiration. Used across all three platforms.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128272; bcrypt Password Hashing</h4>
+          <p>Passwords hashed with salt. Never stored in plaintext.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128683; Progressive Account Lockout</h4>
+          <p>5 failed attempts trigger exponential lockout: Lock 1 = 15min, Lock 2 = 30min, Lock 3 = 60min. Formula: 15 &times; 2<sup>(count-5)</sup></p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128271; OTP Email Verification</h4>
+          <p>6-digit code sent via email, expires in 5 minutes. Used for login verification and account recovery.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128241; Device Fingerprinting</h4>
+          <p>Single-device enforcement — users can only log in from one registered device.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128247; Biometric Auth (Mobile)</h4>
+          <p>Fingerprint and Face ID support via local_auth on Flutter mobile app.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128737; Helmet.js Headers</h4>
+          <p>HTTP security headers to protect against common web vulnerabilities.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#9888; Rate Limiting</h4>
+          <p>Request throttling via express-rate-limit to prevent DDoS and brute-force attacks.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128336; Server-Side Timestamps</h4>
+          <p>All time operations use server time (Asia/Phnom_Penh) — prevents clock manipulation fraud.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128205; GPS Geofence Verification</h4>
+          <p>Haversine formula calculates distance. Check-in only valid within 100m of registered location.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128196; Rotating File Logs</h4>
+          <p>Daily log rotation with gzip compression. 14-day retention for audit trails.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128273; AES Encryption</h4>
+          <p>Custom crypto operations for sensitive data encryption/decryption.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- EXTERNAL INTEGRATIONS -->
+  <!-- ============================================ -->
+  <div class="section" id="integrations">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#127760;</span> External Integrations</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Integration</th><th>Purpose</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Socket.IO</strong></td><td>Real-time communication</td><td>Broadcasts <code>dataUpdate</code> events on any data mutation to all connected clients</td></tr>
+            <tr><td><strong>Firebase Admin SDK</strong></td><td>Push notifications</td><td>3 separate projects: ambel-cash-checkin (web admin), ambel-cash-system (web check-in), lcc-check-in (mobile)</td></tr>
+            <tr><td><strong>Telegram Bots</strong></td><td>Alert messaging</td><td>3 bot instances — one per branch + exchange rate notification bot</td></tr>
+            <tr><td><strong>Google Cloud Vision</strong></td><td>OCR</td><td>Cambodian ID card text extraction and reading</td></tr>
+            <tr><td><strong>OpenWeatherMap</strong></td><td>Weather data</td><td>Used by prediction service for attendance risk assessment</td></tr>
+            <tr><td><strong>Nodemailer (Gmail SMTP)</strong></td><td>Email OTP</td><td>6-digit code delivery for two-factor authentication</td></tr>
+            <tr><td><strong>Redis</strong></td><td>Caching</td><td>ioredis caching layer (currently disabled in production)</td></tr>
+            <tr><td><strong>MSSQL</strong></td><td>SQL Server</td><td>Standalone Express server on port 3000 for legacy data integration</td></tr>
+            <tr><td><strong>Puppeteer</strong></td><td>PDF generation</td><td>Server-side PDF rendering for reports and payslips</td></tr>
+            <tr><td><strong>node-cron</strong></td><td>Scheduled tasks</td><td>Auto-updates meeting status every 5 minutes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- WEB DASHBOARD OVERVIEW -->
+  <!-- ============================================ -->
+  <div class="section" id="web-overview">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128187;</span> Web Dashboard Overview (Vue.js)</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <p>Vue.js 3 Progressive Web App with 120 routes, 60+ pages, RBAC, and full bilingual support.</p>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Component</th><th>Count</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td>Views/Pages</td><td><strong>60+</strong></td><td>HR admin, employee self-service, loan/finance, admin settings</td></tr>
+            <tr><td>Routes</td><td><strong>120</strong></td><td>3 route groups: main, HR, employee — all guarded</td></tr>
+            <tr><td>Components</td><td><strong>40+</strong></td><td>20+ form modals, pagination, cash flow, shared components</td></tr>
+            <tr><td>Layout Components</td><td><strong>12</strong></td><td>AppLayout, Sidebar, Topbar, Mobile layouts, Footer</td></tr>
+            <tr><td>Composables</td><td><strong>17+</strong></td><td>Reusable logic for disbursements, storage, formatting, device</td></tr>
+            <tr><td>Pinia Stores</td><td><strong>2</strong></td><td>layoutStore.js (UI state), branch.js (branch data + persistence)</td></tr>
+            <tr><td>Services</td><td><strong>3</strong></td><td>apiURL.js, socket.js, timeStamp.js</td></tr>
+            <tr><td>RBAC Permissions</td><td><strong>20+</strong></td><td>Role-based access control with permission keys</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- WEB PAGES -->
+  <!-- ============================================ -->
+  <div class="section" id="web-pages">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128196;</span> Web Pages &amp; Views (60+)</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <h3>Login &amp; Layout</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Page</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Login.vue</strong></td><td>Authentication with username/password + OTP verification</td></tr>
+              <tr><td><strong>AppLayout.vue</strong></td><td>Main admin layout shell</td></tr>
+              <tr><td><strong>AppEmployeeLayout.vue</strong></td><td>Employee self-service layout</td></tr>
+              <tr><td><strong>AppMobileLayout.vue</strong></td><td>Mobile-responsive layout</td></tr>
+              <tr><td><strong>AppSidebar.vue / AppTopbar.vue</strong></td><td>Navigation components</td></tr>
+              <tr><td><strong>MobileBottomNav.vue / MobileTopBar.vue</strong></td><td>Mobile navigation</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>HR Module (Admin Dashboard)</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Page</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Dashboard</strong></td><td>Overview with charts (attendance rates, employee counts)</td></tr>
+              <tr><td><strong>PredictionDashboard</strong></td><td>AI-powered attendance risk prediction display</td></tr>
+              <tr><td><strong>LiveTrackingMap</strong></td><td>Real-time employee GPS tracking on Leaflet map</td></tr>
+              <tr><td><strong>EmployeeList</strong></td><td>Full employee directory with search/filter</td></tr>
+              <tr><td><strong>EmployeeDetails</strong></td><td>Individual employee profile and history</td></tr>
+              <tr><td><strong>AttendanceList</strong></td><td>All attendance records with filtering</td></tr>
+              <tr><td><strong>AttendanceReport / CheckInReport / CheckOutReport</strong></td><td>Attendance analytics and reports</td></tr>
+              <tr><td><strong>InboxLeave</strong></td><td>Admin leave approval inbox</td></tr>
+              <tr><td><strong>LeaveHistory / LeaveReport</strong></td><td>Leave tracking and reporting</td></tr>
+              <tr><td><strong>EvaluationList / EvaluationReport</strong></td><td>Performance evaluations</td></tr>
+              <tr><td><strong>PayrollList / PayrollReport / PayrollDetails</strong></td><td>Payroll management</td></tr>
+              <tr><td><strong>Inventory / InventoryReport</strong></td><td>Company asset inventory</td></tr>
+              <tr><td><strong>PurchaseAssets / PurchaseAssetHistory</strong></td><td>Asset purchasing</td></tr>
+              <tr><td><strong>CompanyInventoryTransaction</strong></td><td>Asset check-out/return tracking</td></tr>
+              <tr><td><strong>DepartmentList / EmployeePosition / LeaveTypeList / Category</strong></td><td>Reference data management</td></tr>
+              <tr><td><strong>LocationCheckList</strong></td><td>GPS check-in location management</td></tr>
+              <tr><td><strong>MeetingList</strong></td><td>Meeting management</td></tr>
+              <tr><td><strong>EmployeeSaoThunPayment / SeniorityPayReport</strong></td><td>Cambodian seniority pay</td></tr>
+              <tr><td><strong>AccidentExpenseReport / AuditTrailReport</strong></td><td>Accident and audit reports</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Employee Self-Service</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Page</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Dashboard (Employee)</strong></td><td>Personal attendance overview</td></tr>
+              <tr><td><strong>Attendance</strong></td><td>Personal check-in/out with GPS + QR</td></tr>
+              <tr><td><strong>Leaves</strong></td><td>Leave request submission</td></tr>
+              <tr><td><strong>Payslips</strong></td><td>Personal payslip viewing</td></tr>
+              <tr><td><strong>Profile</strong></td><td>Profile management</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Loan/Finance &amp; Admin Settings</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Page</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Dashboard (Loan)</strong></td><td>Financial overview (branch/user/currency counts)</td></tr>
+              <tr><td><strong>CashFlow / DisbursementHistory</strong></td><td>Cash flow and loan disbursement tracking</td></tr>
+              <tr><td><strong>Branch / Currencies / ExchangeRate</strong></td><td>System configuration</td></tr>
+              <tr><td><strong>Holidays</strong></td><td>Holiday management</td></tr>
+              <tr><td><strong>UserPermission / Users</strong></td><td>User and permission management</td></tr>
+              <tr><td><strong>UserList / SignupUser</strong></td><td>Super admin user management</td></tr>
+              <tr><td><strong>MobileAppVersion</strong></td><td>Mobile app version control</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- WEB COMPONENTS -->
+  <!-- ============================================ -->
+  <div class="section" id="web-components">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#129513;</span> Web Components (40+)</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <h3>Form Modals (20+)</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Component</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td>EmployeeForm / EmployeeEditIDForm</td><td>Employee creation and editing</td></tr>
+              <tr><td>ProfilePopup</td><td>Employee profile modal</td></tr>
+              <tr><td>DepartmentForm / PositionForm / LeaveTypeForm / CategoryForm</td><td>Reference data forms</td></tr>
+              <tr><td>LocationCheckForm</td><td>GPS location setup</td></tr>
+              <tr><td>InventoryForm / CompanyAssetTransactionForm / PurchaseAssetForm</td><td>Asset management forms</td></tr>
+              <tr><td>PayrollForm / EvaluationForm / SaoThunPaymentForm</td><td>Payroll and evaluation forms</td></tr>
+              <tr><td>MeetingForm / EmpLoanProductForm</td><td>Meeting and loan product forms</td></tr>
+              <tr><td>BranchForm / CurrenciesForm / ExchangeRateForm</td><td>System config forms</td></tr>
+              <tr><td>HolidayForm / UserPermissionForm / PurposesForm</td><td>Settings forms</td></tr>
+              <tr><td>ImportExel</td><td>Excel import functionality</td></tr>
+              <tr><td>UpdateStatusComfirmation</td><td>Status change confirmation dialog</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Shared Components</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Component</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td>Pagination</td><td>Table pagination with page navigation</td></tr>
+              <tr><td>CashFlow</td><td>Cash flow visualization</td></tr>
+              <tr><td>ClientDisbursementHistory</td><td>Client loan disbursement history</td></tr>
+              <tr><td>GuarantorDisbursementHistory</td><td>Guarantor loan history</td></tr>
+              <tr><td>JoinBorrowerDisbursementHistory</td><td>Joint borrower loan history</td></tr>
+              <tr><td>WithdrawalCollateralConfirmation</td><td>Collateral withdrawal confirmation</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- COMPOSABLES -->
+  <!-- ============================================ -->
+  <div class="section" id="web-composables">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128268;</span> Composables &amp; Services</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <h3>Composables (17+)</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Composable</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>useDisbursements.js</strong></td><td>Loan disbursement logic</td></tr>
+              <tr><td><strong>useLoanTransaction.js</strong></td><td>Loan transaction handling</td></tr>
+              <tr><td><strong>useStorage.js</strong></td><td>Local storage operations</td></tr>
+              <tr><td><strong>useEvaluationTransaction.js</strong></td><td>Evaluation data management</td></tr>
+              <tr><td><strong>useCompanyAssetTransaction.js</strong></td><td>Asset transaction logic</td></tr>
+              <tr><td><strong>useDMTelegram.js</strong></td><td>Telegram bot integration</td></tr>
+              <tr><td><strong>useDevice.js</strong></td><td>Device detection (mobile/desktop)</td></tr>
+              <tr><td><strong>formatDate.js</strong></td><td>Date formatting utilities</td></tr>
+              <tr><td><strong>formatCurrency.js</strong></td><td>Currency formatting</td></tr>
+              <tr><td><strong>timestamp.js</strong></td><td>Server timestamp fetching</td></tr>
+              <tr><td><strong>useBranch.js</strong></td><td>Branch data management</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Services</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Service</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>apiURL.js</strong></td><td>API base URL configuration</td></tr>
+              <tr><td><strong>socket.js</strong></td><td>Socket.IO client connection + event handling</td></tr>
+              <tr><td><strong>timeStamp.js</strong></td><td>Server timestamp fetching</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- WEB KEY FEATURES -->
+  <!-- ============================================ -->
+  <div class="section" id="web-features">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#10024;</span> Key Frontend Features</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>&#128241; PWA Support</h4>
+          <p>Progressive Web App — installable on desktop and mobile devices via browser.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128270; QR Code Generation</h4>
+          <p>Server-side QR code generation for attendance verification.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128506; Live Tracking Map</h4>
+          <p>Leaflet.js map showing real-time employee GPS positions.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128196; PDF Export</h4>
+          <p>jsPDF + jspdf-autotable for report and payslip PDF generation.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128202; Excel Export</h4>
+          <p>ExcelJS + xlsx for spreadsheet report export.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128200; Dashboard Charts</h4>
+          <p>Chart.js + vue-chartjs for attendance analytics visualizations.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#127760; Bilingual UI</h4>
+          <p>English + Khmer with NotoSerifKhmer font support.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#9889; Socket.IO Real-Time</h4>
+          <p>Instant data refresh on any mutation across all connected clients.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128276; Firebase Push Notifications</h4>
+          <p>Browser push notifications via Firebase Cloud Messaging.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#127916; Lottie Animations</h4>
+          <p>Animated loading states and empty state illustrations.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128241; Responsive Design</h4>
+          <p>Dedicated mobile and desktop layouts with Tailwind CSS.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128272; RBAC</h4>
+          <p>20+ permission keys for role-based access control in navigation and UI.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- MOBILE APP OVERVIEW -->
+  <!-- ============================================ -->
+  <div class="section" id="mobile-overview">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128241;</span> Mobile App Overview (Flutter)</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <p>Cross-platform Flutter app (Android + iOS) with GetX state management, biometric auth, QR scanning, GPS geofencing, and push notifications.</p>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Component</th><th>Count</th><th>Details</th></tr></thead>
+          <tbody>
+            <tr><td>Screens</td><td><strong>20+</strong></td><td>Attendance, permission, accident, assets, profile, video lessons, etc.</td></tr>
+            <tr><td>Services</td><td><strong>14</strong></td><td>API, socket, location, push, biometric, auth, attendance, etc.</td></tr>
+            <tr><td>Widgets</td><td><strong>24</strong></td><td>Reusable UI widgets (buttons, cards, dialogs, loading)</td></tr>
+            <tr><td>Utilities</td><td><strong>6</strong></td><td>Device info, date formatting, image handling, permissions</td></tr>
+            <tr><td>Localization</td><td><strong>312 keys</strong></td><td>English + Khmer translations with custom fonts</td></tr>
+            <tr><td>Socket Events</td><td><strong>9 types</strong></td><td>Attendance, PermissionLeave, Accident, Notification, etc.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- MOBILE SCREENS -->
+  <!-- ============================================ -->
+  <div class="section" id="mobile-screens">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128241;</span> Mobile Screens &amp; Features</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <h3>Authentication</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Screen</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>LoginScreen</strong></td><td>Username/password login</td></tr>
+              <tr><td><strong>EmailOtpScreen</strong></td><td>Email OTP verification</td></tr>
+              <tr><td><strong>LoginController</strong></td><td>Auth state management with GetX</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Attendance (Core Feature)</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Screen</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>CheckInScreen</strong></td><td>GPS-verified check-in/out with photo capture</td></tr>
+              <tr><td><strong>QRScannerScreen</strong></td><td>QR code scanning for attendance verification</td></tr>
+              <tr><td><strong>AttendanceHistory</strong></td><td>Personal attendance records</td></tr>
+              <tr><td><strong>AdminCheckAttendance</strong></td><td>Admin view of all employee attendance</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Permission / Leave</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Screen</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>PermissionScreen</strong></td><td>Employee leave request submission</td></tr>
+              <tr><td><strong>CheckPermission</strong></td><td>Admin leave approval</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Accident Reporting</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Screen</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>AccidentScreen</strong></td><td>Workplace accident reporting with photos</td></tr>
+              <tr><td><strong>CheckAccident</strong></td><td>Admin accident review</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Letter / Mission System</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Screen</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>CommandMission</strong></td><td>Management command letters</td></tr>
+              <tr><td><strong>RequestMission</strong></td><td>Mission request submission</td></tr>
+              <tr><td><strong>ExpenseMission</strong></td><td>Expense reporting for missions</td></tr>
+              <tr><td><strong>ArriveCheck</strong></td><td>Mission arrival verification</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Company Assets</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Screen</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Assets</strong></td><td>View assigned company assets</td></tr>
+              <tr><td><strong>Categories</strong></td><td>Asset category browsing</td></tr>
+              <tr><td><strong>Transactions</strong></td><td>Asset check-out/return history</td></tr>
+              <tr><td><strong>PurchaseAssets</strong></td><td>Request new asset purchases</td></tr>
+              <tr><td><strong>PurchaseHistory</strong></td><td>Purchase request history</td></tr>
+              <tr><td><strong>StockTransfer</strong></td><td>Asset stock transfer management</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Other Screens</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Screen</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><strong>ProfileScreen / InfoScreen</strong></td><td>Personal profile view and details</td></tr>
+              <tr><td><strong>VideoLessonScreen / VideoPlayerScreen</strong></td><td>Training video library and playback</td></tr>
+              <tr><td><strong>NotificationCenter</strong></td><td>In-app notification center</td></tr>
+              <tr><td><strong>DrawerScreen</strong></td><td>Side drawer navigation</td></tr>
+              <tr><td><strong>Language Selection</strong></td><td>Khmer/English language switching</td></tr>
+              <tr><td><strong>NoteScreen / NoteEdit</strong></td><td>Personal notes</td></tr>
+              <tr><td><strong>Settings</strong></td><td>App settings</td></tr>
+              <tr><td><strong>Register</strong></td><td>New user registration</td></tr>
+              <tr><td><strong>PrivacyPolicy</strong></td><td>Privacy policy display</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- MOBILE SERVICES -->
+  <!-- ============================================ -->
+  <div class="section" id="mobile-services">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#9881;</span> Mobile Services (14 files)</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>Service</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ApiService</strong></td><td>HTTP client (Dio) with base URL configuration</td></tr>
+            <tr><td><strong>SocketService</strong></td><td>Socket.IO real-time event handling (9 event types)</td></tr>
+            <tr><td><strong>LocationService</strong></td><td>GPS location fetching (geolocator plugin)</td></tr>
+            <tr><td><strong>PushNotificationService</strong></td><td>Firebase FCM token registration + message handling</td></tr>
+            <tr><td><strong>BiometricService</strong></td><td>Fingerprint/Face ID authentication (local_auth)</td></tr>
+            <tr><td><strong>AuthService</strong></td><td>Login/logout/OTP logic</td></tr>
+            <tr><td><strong>AttendanceService</strong></td><td>Check-in/out API calls</td></tr>
+            <tr><td><strong>PermissionService</strong></td><td>Leave request API calls</td></tr>
+            <tr><td><strong>AccidentService</strong></td><td>Accident report API calls</td></tr>
+            <tr><td><strong>AssetService</strong></td><td>Company asset API calls</td></tr>
+            <tr><td><strong>NotificationService</strong></td><td>In-app notification management</td></tr>
+            <tr><td><strong>VideoLessonService</strong></td><td>Training video API calls</td></tr>
+            <tr><td><strong>MissionService</strong></td><td>Mission letter API calls</td></tr>
+            <tr><td><strong>LanguageService</strong></td><td>Language switching and persistence</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- MOBILE-SPECIFIC -->
+  <!-- ============================================ -->
+  <div class="section" id="mobile-specific">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128241;</span> Mobile-Specific Features</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>&#128247; Biometric Auth</h4>
+          <p>Fingerprint and Face ID support via local_auth plugin.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128249; Camera Capture</h4>
+          <p>Photo capture during check-in for identity verification.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128270; QR Code Scanner</h4>
+          <p>mobile_scanner plugin for QR code attendance verification.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128205; GPS Geolocation</h4>
+          <p>geolocator plugin for geofence check-in/out verification.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128276; Push Notifications</h4>
+          <p>Firebase FCM with sound + vibration feedback.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128256; Connectivity Monitor</h4>
+          <p>connectivity_plus plugin for offline/online status detection.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#9999; Digital Signatures</h4>
+          <p>Syncfusion SignaturePad for mission letter signing.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#127916; Lottie Animations</h4>
+          <p>Animated loading and empty states via Lottie.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128256; Haptic Feedback</h4>
+          <p>Vibration plugin for tactile feedback on actions.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#127760; Bilingual Support</h4>
+          <p>312 translation keys in English + Khmer with custom fonts.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#128248; Cached Images</h4>
+          <p>cached_network_image for efficient image loading and caching.</p>
+        </div>
+        <div class="feature-card">
+          <h4>&#127925; Audio Playback</h4>
+          <p>audioplayers plugin for notification sounds (check-in/out MP3s).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- DATABASE SCHEMA -->
+  <!-- ============================================ -->
+  <div class="section" id="database">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128451;</span> Database Schema (50+ Collections)</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+
+      <div class="subsection">
+        <h3>Access Control</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Entity</th><th>Collection</th><th>Key Fields</th><th>Relationships</th></tr></thead>
+            <tbody>
+              <tr><td><strong>User</strong></td><td>users</td><td>username, email, password, mainRole, roleId, branchId[], employeeId, chiefIds[]</td><td>N:1 Role, N:M Branch, 1:1 Employee</td></tr>
+              <tr><td><strong>Role</strong></td><td>roles</td><td>name, permission (JSON map)</td><td>1:N User</td></tr>
+              <tr><td><strong>Branch</strong></td><td>branches</td><td>nameKh, nameEn, location, phone, email</td><td>1:N to all entities</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>HR Core</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Entity</th><th>Collection</th><th>Key Fields</th><th>Relationships</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Employee</strong></td><td>employees</td><td>khName, enName, gender, dob, branchId, departmentId, positionId, chiefId, startWorkDate, bankInfo</td><td>N:1 Branch/Dept/Position, 1:1 User</td></tr>
+              <tr><td><strong>Department</strong></td><td>departments</td><td>nameKh, nameEn, branchId</td><td>1:N Employee</td></tr>
+              <tr><td><strong>EmployeePosition</strong></td><td>employeepositions</td><td>nameKh, nameEn</td><td>1:N Employee</td></tr>
+              <tr><td><strong>Category</strong></td><td>categories</td><td>nameKh, nameEn</td><td>1:N Employee</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Attendance</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Entity</th><th>Collection</th><th>Key Fields</th><th>Relationships</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Attendance</strong></td><td>attendances</td><td>employeeId, date, checkInTime, checkOutTime, checkInLocation, checkInPhoto, status (present/late/absent/half-day)</td><td>N:1 Employee, Branch</td></tr>
+              <tr><td><strong>LocationCheck</strong></td><td>locationchecks</td><td>name, latitude, longitude, radius, branchId</td><td>N:1 Branch</td></tr>
+              <tr><td><strong>LeaveType</strong></td><td>leavetypes</td><td>nameKh, nameEn, leaveDays</td><td>1:N PermissionLeave</td></tr>
+              <tr><td><strong>PermissionLeave</strong></td><td>permissionleaves</td><td>employeeId, leaveTypeId, startDate, endDate, totalDays, status (pending/approved/rejected)</td><td>N:1 Employee, LeaveType</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Payroll</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Entity</th><th>Collection</th><th>Key Fields</th><th>Relationships</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Payroll</strong></td><td>payrolls</td><td>month, year, branchId, employeeIds[], totalSalary, status (draft/approved/paid)</td><td>N:M Employee, N:1 Branch</td></tr>
+              <tr><td><strong>Evaluation</strong></td><td>evaluations</td><td>employeeId, score, comment, evaluationDate</td><td>N:1 Employee</td></tr>
+              <tr><td><strong>SaoThunPayment</strong></td><td>saothunpayments</td><td>employeeId, amount, paymentDate, status</td><td>N:1 Employee</td></tr>
+              <tr><td><strong>EmployeeCapital</strong></td><td>employeecapitals</td><td>employeeId, amount, type (deposit/withdrawal)</td><td>N:1 Employee</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Asset Management</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Entity</th><th>Collection</th><th>Key Fields</th><th>Relationships</th></tr></thead>
+            <tbody>
+              <tr><td><strong>CompanyAsset</strong></td><td>companyassets</td><td>name, serialNumber, branchId, purchasePrice, status (available/assigned/retired)</td><td>N:1 Branch</td></tr>
+              <tr><td><strong>AssetTransaction</strong></td><td>companyassettransactions</td><td>assetId, employeeId, assignedDate, returnedDate</td><td>N:1 Asset, Employee</td></tr>
+              <tr><td><strong>PurchaseAsset</strong></td><td>purchaseassets</td><td>name, quantity, totalPrice, branchId</td><td>N:1 Branch</td></tr>
+              <tr><td><strong>StockTransfer</strong></td><td>stocktransfers</td><td>assetId, fromBranch, toBranch, transferDate</td><td>N:1 Asset, Branch</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3>Additional Collections</h3>
+        <p><code>holidays</code>, <code>exchangerates</code>, <code>currencies</code>, <code>companies</code>, <code>livelocations</code>, <code>userlogs</code>, <code>notifications</code>, <code>meetings</code>, <code>videolessons</code>, <code>mobileappversions</code>, <code>calendarnotes</code>, <code>areas</code>, <code>locations</code>, <code>collateraltypes</code>, <code>identifycardtypes</code>, <code>disbursementpurposes</code>, <code>provisionjournals</code>, <code>accounts</code>, <code>accounttypes</code>, <code>closingentries</code>, <code>exchangemoney</code>, <code>expenses</code>, <code>deletelogs</code></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 10 MAJOR MODULES -->
+  <!-- ============================================ -->
+  <div class="section" id="modules">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128218;</span> 10 Major Feature Modules</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="feature-grid">
+
+        <div class="feature-card">
+          <h4>&#9201; 1. Core Attendance System</h4>
+          <ul>
+            <li>GPS geofencing (100m via Haversine formula)</li>
+            <li>QR code verification</li>
+            <li>Server-side timestamps (anti-fraud)</li>
+            <li>Late/early detection</li>
+            <li>Reason submission for absences</li>
+            <li>Approval workflow (chief &#8594; admin)</li>
+            <li>Device fingerprinting</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h4>&#128197; 2. Leave/Permission Management</h4>
+          <ul>
+            <li>Full-day/half-day/hourly/minute-based leave</li>
+            <li>Admin approval inbox</li>
+            <li>Leave type configuration</li>
+            <li>Approval chain (chief &#8594; admin)</li>
+            <li>Leave history and reporting</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h4>&#128176; 3. Payroll Management</h4>
+          <ul>
+            <li>Attendance-integrated payroll</li>
+            <li>Cambodian "Sao Thun" seniority pay</li>
+            <li>Termination payroll</li>
+            <li>Payslip generation</li>
+            <li>PDF/Excel export</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h4>&#128101; 4. Employee Management</h4>
+          <ul>
+            <li>Full CRUD with bilingual names</li>
+            <li>Positions, departments, contracts</li>
+            <li>Work hours configuration</li>
+            <li>Capital/loan tracking</li>
+            <li>Sequential branch-scoped IDs</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h4>&#11088; 5. Evaluation System</h4>
+          <ul>
+            <li>Configurable evaluation schedules</li>
+            <li>Multi-criteria scoring</li>
+            <li>Attendance rate statistics</li>
+            <li>Workday/late count analytics</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h4>&#128230; 6. Company Asset Management</h4>
+          <ul>
+            <li>Inventory with categories/subcategories</li>
+            <li>Check-out/return workflow</li>
+            <li>Stock transfers between branches</li>
+            <li>Purchase tracking</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h4>&#128220; 7. Mission Letter System</h4>
+          <ul>
+            <li>Digital signatures (Syncfusion SignaturePad)</li>
+            <li>Command letters from management</li>
+            <li>Expense reporting</li>
+            <li>Khmer date formatting</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h4>&#9888; 8. Accident Expense Management</h4>
+          <ul>
+            <li>Workplace accident reporting with photos</li>
+            <li>Admin review workflow</li>
+            <li>Accident expense tracking</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h4>&#9889; 9. Real-Time Communication</h4>
+          <ul>
+            <li>Socket.IO bidirectional updates</li>
+            <li>Firebase FCM (3 projects)</li>
+            <li>Telegram bots (per-branch)</li>
+            <li>In-app notification center</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <h4>&#129504; 10. AI Attendance Prediction</h4>
+          <ul>
+            <li>Day-of-week pattern analysis</li>
+            <li>Holiday adjacency detection</li>
+            <li>Weather conditions (OpenWeatherMap)</li>
+            <li>30-day attendance history</li>
+            <li>Risk: Low / Medium / High</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- FILE STRUCTURE -->
+  <!-- ============================================ -->
+  <div class="section" id="file-structure">
+    <div class="section-header" onclick="toggleSection(this)">
+      <h2><span class="icon">&#128193;</span> Project File Structure</h2>
+      <span class="toggle">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="code-block">
+<pre style="margin:0;background:transparent;color:#cdd6f4;">
+<span class="comment">/Thesis/</span>
+├── <span class="keyword">backend/</span>                              <span class="comment"># Node.js/Express REST API</span>
+│   ├── app.js                            <span class="comment"># Entry point (572 lines)</span>
+│   ├── socket.js                         <span class="comment"># Socket.IO server singleton</span>
+│   ├── middleware/authMiddleware.js       <span class="comment"># JWT + API token verification</span>
+│   ├── routes/                           <span class="comment"># 6 route files</span>
+│   │   ├── auth.js, dynamicRoute.js, timestampRoute.js
+│   │   ├── telegramRoute.js, evaluationStats.js, prediction.js
+│   ├── controllers/                      <span class="comment"># 12 controller files (4000+ lines)</span>
+│   │   ├── authController.js (411 lines)
+│   │   ├── useDataController.js (1400+ lines)
+│   │   ├── getDataController.js (1500+ lines)
+│   │   ├── qrController.js (69 lines, Haversine)
+│   │   ├── visionController.js (263 lines, OCR)
+│   ├── models/                           <span class="comment"># 80+ Mongoose model files</span>
+│   │   ├── user.js, branch.js, role.js, holiday.js, etc.
+│   │   ├── hr/     (25+ HR models)
+│   │   ├── mobile/ (mobileAppVersion, videoLesson)
+│   ├── services/                         <span class="comment"># predictionService, weatherService, emailService</span>
+│   ├── firebase/                         <span class="comment"># 3 Firebase admin SDK JSON keys</span>
+│   ├── utils/                            <span class="comment"># getNextId.js, numberId.js</span>
+│   ├── redis/redisClient.js              <span class="comment"># Redis caching client</span>
+│   └── cryptoOperations/cryption.js      <span class="comment"># AES encryption</span>
+│
+├── <span class="keyword">attendance-management-system-lcc/</span>     <span class="comment"># Vue.js 3 Web Dashboard (PWA)</span>
+│   ├── package.json
+│   ├── vue.config.js                     <span class="comment"># PWA config</span>
+│   ├── tailwind.config.js                <span class="comment"># Green theme (#1B6B1A)</span>
+│   └── src/
+│       ├── main.js, App.vue
+│       ├── router/   (index.js, hr.js, employee.js)
+│       ├── store/    (layoutStore.js, branch.js)
+│       ├── layout/   (AppLayout, AppMobileLayout, AppSidebar)
+│       ├── views/    (Dashboard, hr/, employee/)
+│       ├── components/ (Model/ with 20+ form modals)
+│       ├── composables/ (17+ files)
+│       ├── services/, firebase/, utils/, assets/
+│
+├── <span class="keyword">check-in-app/</span>                         <span class="comment"># Flutter Mobile App</span>
+│   ├── pubspec.yaml                      <span class="comment"># version 0.1.6+7</span>
+│   └── lib/
+│       ├── main.dart
+│       ├── localization/ (en.dart, km.dart - 312 keys)
+│       ├── services/     (14 service files)
+│       ├── features/     (attendance, permission, accident,
+│       │                  notification, letter_mission,
+│       │                  company_asset, profile, video_lesson)
+│       └── widgets/      (24 shared UI widgets)
+│
+├── thesis-erd.html                       <span class="comment"># ERD documentation</span>
+└── thesis-presentation.html              <span class="comment"># Thesis presentation</span>
+</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center; padding:2rem 0 1rem; color:var(--text-light); font-size:0.8rem;">
+    <p>HR Attendance Management System &mdash; Thesis Documentation</p>
+    <p>Generated for academic reference &bull; All features, code, and architecture details</p>
+  </div>
+
+</div>
+
+<!-- Back to Top Button -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+
+<script>
+  // Toggle sections
+  function toggleSection(header) {
+    header.parentElement.classList.toggle('collapsed');
+  }
+
+  // Back to top visibility
+  window.addEventListener('scroll', function() {
+    const btn = document.getElementById('backToTop');
+    if (window.scrollY > 300) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+
+    // Active nav highlighting
+    updateActiveNav();
+  });
+
+  // Active nav highlight
+  function updateActiveNav() {
+    const sections = document.querySelectorAll('.section[id]');
+    const navLinks = document.querySelectorAll('.sidebar nav a');
+    let current = '';
+
+    sections.forEach(function(section) {
+      const rect = section.getBoundingClientRect();
+      if (rect.top <= 150) current = section.id;
+    });
+
+    navLinks.forEach(function(link) {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  }
+
+  // Search
+  function handleSearch(query) {
+    const results = document.getElementById('searchResults');
+    if (!query || query.length < 2) {
+      results.style.display = 'none';
+      results.innerHTML = '';
+      return;
+    }
+
+    const sections = document.querySelectorAll('.section[id]');
+    const matches = [];
+
+    sections.forEach(function(section) {
+      const header = section.querySelector('.section-header h2');
+      const body = section.querySelector('.section-body');
+      const text = (header ? header.textContent : '') + ' ' + (body ? body.textContent.substring(0, 500) : '');
+
+      if (text.toLowerCase().includes(query.toLowerCase())) {
+        matches.push({
+          id: section.id,
+          title: header ? header.textContent.trim() : section.id
+        });
+      }
+    });
+
+    if (matches.length === 0) {
+      results.innerHTML = '<a href="#" style="pointer-events:none;color:rgba(255,255,255,0.3);">No results found</a>';
+    } else {
+      results.innerHTML = matches.map(function(m) {
+        return '<a href="#' + m.id + '" onclick="document.getElementById(\'searchResults\').style.display=\'none\';document.getElementById(\'searchInput\').value=\'\';">' + m.title + '</a>';
+      }).join('');
+    }
+    results.style.display = 'block';
+  }
+
+  // Close search on click outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-box')) {
+      document.getElementById('searchResults').style.display = 'none';
+    }
+  });
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('.sidebar nav a').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Close mobile sidebar
+        document.querySelector('.sidebar').classList.remove('open');
+      }
+    });
+  });
+
+  // Initial active state
+  updateActiveNav();
+</script>
+
+</body>
+</html>
